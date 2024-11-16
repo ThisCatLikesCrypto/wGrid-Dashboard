@@ -1,0 +1,48 @@
+@import "https://code.highcharts.com/dashboards/css/dashboards.css";
+
+body {
+    font-family: Calibri, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #1e1e1e;
+    color: #f4f4f9;
+}
+
+header {
+    background-color: #052c50;
+    color: white;
+    padding: 0.5em;
+    text-align: center;
+}
+
+header .content {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+main {
+    padding: 1em;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+#dashboard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1em;
+}
+
+#chart-container {
+    width: 100%;
+    max-width: 900px;
+    height: 500px;
+}
+
+#info {
+    text-align: center;
+}
+
+#info p {
+    margin: 0.5em 0;
+}
