@@ -2,11 +2,25 @@ const apiUrl = 'http://localhost:3000/current'; // Run wGrid-Backend locally, I'
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    function updateLoadingStatus(status) {
+        var loadingStatusElements = document.getElementsByClassName('loading-status');
+        for (var i = 0; i < loadingStatusElements.length; i++) {
+            loadingStatusElements[i].textContent = status;
+        }
+    }
+
+    function calculateDemand(data) {
+        const demand = data.WIND + data.SOLAR + data.NPSHYD + data.NUCLEAR + data.PS + data.BIOMASS + data.CCGT + data.COAL + data.OIL + data.INTELEC + data.INTFR + data.INTNED + data.INTNSL + data.INTNEM + data.INTGRNL + data.INTIRL + data.INTIFA2 + data.INTVKL;
+        return demand;
+    }
+
     async function fetchGridData() {
         try {
+            updateLoadingStatus('Fetching...');
             const response = await fetch(apiUrl);
             if (!response.ok) throw new Error('Network response was not ok');
             const data = await response.json();
+            updateLoadingStatus('200 OK');
             updateDashboard(data);
         } catch (error) {
             console.error('Error fetching grid data:', error);
@@ -169,9 +183,65 @@ document.addEventListener('DOMContentLoaded', () => {
             color: colours[key] || '#808080' // Default to grey if color is not mapped
         }));
 
+        // Aggregate data for bar chart
+        const aggregatedData = {
+            Renewable: data.WIND + data.SOLAR + data.NPSHYD,
+            'Low-Carbon': data.NUCLEAR + data.PS + data.BIOMASS,
+            'Fossil Fuels': data.CCGT + data.COAL + data.OIL,
+            Imports:
+                data.INTELEC +
+                data.INTFR +
+                data.INTNED +
+                data.INTNSL +
+                data.INTNEM +
+                data.INTGRNL +
+                data.INTIRL +
+                data.INTIFA2 +
+                data.INTVKL
+        };
+
+        const barChartData = Object.keys(aggregatedData).map((key) => ({
+            name: key,
+            y: aggregatedData[key],
+            color:
+                key === 'Renewable'
+                    ? '#69D6F8' // Light blue for renewable
+                    : key === 'Low-Carbon'
+                    ? '#9D71F7' // Purple for low-carbon
+                    : key === 'Fossil Fuels'
+                    ? '#AAA189' // Grey-brown for fossil fuels
+                    : '#A97AB0' // Purple for imports
+        }));
+
+
+        var co2IndexElement = document.getElementById('co2-index');
+        var co2IntensityElement = document.getElementById('co2-intensity');
+
         // Update CO2 intensity and index
-        document.getElementById('co2-intensity').textContent = `${data.CO2} gCO₂/kWh`;
-        document.getElementById('co2-index').textContent = data.CO2_INDEX;
+        co2IntensityElement.textContent = `${data.CO2} gCO₂/kWh`;
+        co2IndexElement.textContent = data.CO2_INDEX;
+        if (data.CO2_INDEX == "very low") {
+           co2IndexElement.style.color = "darkgreen";
+           co2IntensityElement.style.color = "darkgreen";
+        } else if (data.CO2_INDEX == "low") {
+           co2IndexElement.style.color = "green";
+           co2IntensityElement.style.color = "green";
+        } else if (data.CO2_INDEX == "moderate") {
+           co2IndexElement.style.color = "yellow";
+           co2IntensityElement.style.color = "yellow";
+        } else if (data.CO2_INDEX == "high") {
+           co2IndexElement.style.color = "orange";
+           co2IntensityElement.style.color = "orange";
+        } else if (data.CO2_INDEX == "very high") {
+           co2IndexElement.style.color = "red";
+           co2IntensityElement.style.color = "red";
+        }
+
+        document.getElementById('demand').textContent = calculateDemand(data);
+
+        document.getElementById('loading').style.display = 'none';
+
+        document.getElementById('overview').style.display = 'flex';
 
         // Render Highcharts pie chart
         Highcharts.chart('chart-container', {
@@ -179,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 type: 'pie'
             },
             title: {
-                text: 'UK Grid Power Generation'
+                text: null // Removes the title
             },
             tooltip: {
                 pointFormat: '{series.name}: <b>{point.y} MW</b> ({point.percentage:.1f}%)'
@@ -191,12 +261,13 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             plotOptions: {
                 pie: {
+                    size: '90%',
                     allowPointSelect: true,
                     cursor: 'pointer',
                     dataLabels: {
-                        enabled: true,
-                        format: '<b>{point.name}</b>: {point.percentage:.1f} %'
-                    }
+                        enabled: false
+                    },
+                    showInLegend: true
                 }
             },
             credits: {
@@ -210,6 +281,52 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             ]
         });
+        
+        // Render Highcharts bar chart
+        Highcharts.chart('bar-chart-container', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: null
+            },
+            xAxis: {
+                categories: Object.keys(aggregatedData),
+                title: {
+                    text: null
+                }
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Power (MW)',
+                    align: 'high'
+                },
+                labels: {
+                    overflow: 'justify'
+                }
+            },
+            tooltip: {
+                valueSuffix: ' MW'
+            },
+            plotOptions: {
+                column: {
+                    dataLabels: {
+                        enabled: true
+                    }
+                }
+            },
+            credits: {
+                enabled: false // Disable the Highcharts watermark
+            },
+            series: [
+                {
+                    name: 'Power (MW)',
+                    data: barChartData
+                }
+            ]
+        });
+        
     }
 
     // Initial fetch

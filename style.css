@@ -8,6 +8,22 @@ body {
     color: #f4f4f9;
 }
 
+text.highcharts-legend-navigation{
+    fill: white;
+}
+
+.loading-indicator {
+    color: orange;
+}
+
+#loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
 header {
     background-color: #052c50;
     color: white;
@@ -27,9 +43,6 @@ main {
 }
 
 #dashboard {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     gap: 1em;
 }
 
@@ -45,4 +58,28 @@ main {
 
 #info p {
     margin: 0.5em 0;
+}
+
+.maindivdiv {
+    display: flex;
+    justify-content: space-between; /* Horizontally center the inner divs */
+    flex-direction: row;
+}
+
+.maindivdiv div {
+    flex: 1; /* Make the inner divs take up the same space */
+}
+
+#overview {
+    text-align: center;
+    font-size: 1.5em;
+    display: none;
+    flex-direction: column;
+}
+
+@media screen and (max-width: 1100px) {
+    .maindivdiv {
+        flex-direction: column; /* Change to a column layout */
+        text-align: center;
+    }
 }

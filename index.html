@@ -9,6 +9,7 @@
     <script src="https://code.highcharts.com/modules/accessibility.js"></script>
     <script src="https://code.highcharts.com/modules/exporting.js"></script>
     <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/offline-exporting.js"></script>
     <script src="https://code.highcharts.com/modules/accessibility.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -20,11 +21,30 @@
         </div>
     </header>
     <main>
-        <div id="dashboard">
-            <div id="chart-container" class="highcharts-dark"></div>
-            <div id="info">
-                <p><b>CO2 Intensity:</b> <span id="co2-intensity"></span></p>
-                <p><b>CO2 Index:</b> <span id="co2-index"></span></p>
+        <div id="dashboard" class="maindivdiv">
+            <div>
+                <div id="chart-container"></div>
+            </div>
+            <div>
+                <div id="bar-chart-container"></div>
+            </div>
+            <div id="loading">
+                <h1 class="loading-indicator">Loading...</h1><br>
+                <p class="loading-status"></p>
+            </div>
+            <div id="overview">
+                <div> 
+                    <b>Carbon Intensity: </b><br>
+                    <h3><span id="co2-intensity"></span></h3>
+                </div>
+                <div>
+                    <b>CO2 Index: </b><br>
+                    <h3><span id="co2-index"></span></h3>
+                </div>
+                <div>
+                    <b>Demand: </b><br>
+                    <h3><span id="demand"></span> MW</h3>
+                </div>
             </div>
         </div>
     </main>
