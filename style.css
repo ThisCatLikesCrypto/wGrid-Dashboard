@@ -42,10 +42,6 @@ main {
     margin: 0 auto;
 }
 
-#dashboard {
-    gap: 1em;
-}
-
 #chart-container {
     width: 100%;
     max-width: 900px;
@@ -64,6 +60,7 @@ main {
     display: flex;
     justify-content: space-between; /* Horizontally center the inner divs */
     flex-direction: row;
+    gap: 1em;
 }
 
 .maindivdiv div {

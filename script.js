@@ -1,4 +1,5 @@
 const apiUrl = 'http://localhost:3000/current'; // Run wGrid-Backend locally, I'll move this to repo.c48.uk once the backend is nearly done
+const past48HrsApiUrl = 'http://localhost:3000/past-48-hrs';
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -7,6 +8,155 @@ document.addEventListener('DOMContentLoaded', () => {
         for (var i = 0; i < loadingStatusElements.length; i++) {
             loadingStatusElements[i].textContent = status;
         }
+    }
+
+    async function fetchPast48HoursData() {
+        try {
+            updateLoadingStatus('Fetching past 48 hours data...');
+            const response = await fetch(past48HrsApiUrl);
+            if (!response.ok) throw new Error('Failed to fetch past 48 hours data');
+            const data = await response.json();
+            renderPast48HoursChart(data);
+            renderCO2Chart(data); // CO₂ chart
+            updateLoadingStatus('Past data loaded successfully');
+        } catch (error) {
+            console.error('Error fetching past 48 hours data:', error);
+            updateLoadingStatus('Error loading past data');
+        }
+    }
+
+    function renderPast48HoursChart(data) {
+        const categories = data.map((entry) => new Date(entry.timestamp).toLocaleString());
+
+        // Define keys to amalgamate into "Imports"
+        const importKeys = [
+            'INTELEC', 'INTEW', 'INTFR', 'INTGRNL', 'INTIFA2',
+            'INTIRL', 'INTNED', 'INTNEM', 'INTNSL', 'INTVKL'
+        ];
+    
+        // Exclude CO2-related keys
+        const excludedKeys = ['CO2', 'CO2_FORECAST', 'CO2_INDEX'];
+    
+        // Process data to create a combined "Imports" category
+        const seriesData = [];
+        const importData = data.map((entry) =>
+            importKeys.reduce((sum, key) => sum + (entry.data[key] || 0), 0)
+        );
+    
+        // Add "Imports" as a single category
+        seriesData.push({
+            name: 'Imports',
+            data: importData,
+            color: '#A97AB0' // Purple for imports
+        });
+    
+        // Add the remaining categories, excluding the imports and CO2-related keys
+        Object.keys(data[0].data)
+            .filter((key) => !importKeys.includes(key) && !excludedKeys.includes(key))
+            .forEach((key) => {
+                seriesData.push({
+                    name: key,
+                    data: data.map((entry) => entry.data[key]),
+                });
+            });
+    
+        // Render the chart
+        Highcharts.chart('past-day-chart-container', {
+            chart: {
+                type: 'line',
+            },
+            title: {
+                text: 'Power Generation (Past 48 Hours)',
+            },
+            xAxis: {
+                categories,
+                title: {
+                    text: 'Timestamp',
+                },
+            },
+            yAxis: {
+                title: {
+                    text: 'Power (MW)',
+                },
+            },
+            tooltip: {
+                shared: true,
+                valueSuffix: ' MW',
+            },
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: true,
+                    },
+                },
+            },
+            series: seriesData,
+            credits: {
+                enabled: false,
+            },
+        });
+    }
+
+    function renderCO2Chart(data) {
+        const categories = data.map((entry) => new Date(entry.timestamp).toLocaleString());
+    
+        // Extract CO₂-related data
+        const co2Data = data.map((entry) => entry.data.CO2);
+        const co2ForecastData = data.map((entry) => entry.data.CO2_FORECAST);
+        const co2IndexData = data.map((entry) => entry.data.CO2_INDEX);
+    
+        // Render the CO₂ chart
+        Highcharts.chart('co2-chart-container', {
+            chart: {
+                type: 'line',
+            },
+            title: {
+                text: 'CO₂ Intensity and Forecast (Past 48 Hours)',
+            },
+            xAxis: {
+                categories,
+                title: {
+                    text: 'Timestamp',
+                },
+            },
+            yAxis: {
+                title: {
+                    text: 'CO₂ Intensity (gCO₂/kWh)',
+                },
+                labels: {
+                    format: '{value} gCO₂/kWh',
+                },
+            },
+            tooltip: {
+                shared: true,
+                pointFormat: '<b>{point.y} gCO₂/kWh</b>',
+            },
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: true,
+                    },
+                },
+            },
+            series: [
+                {
+                    name: 'CO₂ Intensity',
+                    data: co2Data,
+                    color: 'green',
+                },
+                {
+                    name: 'CO₂ Forecast',
+                    data: co2ForecastData,
+                    color: 'blue',
+                },
+            ],
+            credits: {
+                enabled: false,
+            },
+        });
+    
+        // Optional: Render CO₂ index as a categorical data series (if meaningful)
+        console.log('CO₂ Index Data:', co2IndexData);
     }
 
     function calculateDemand(data) {
@@ -21,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('Network response was not ok');
             const data = await response.json();
             updateLoadingStatus('200 OK');
-            updateDashboard(data);
+            updateCurrent(data);
         } catch (error) {
             console.error('Error fetching grid data:', error);
         }
@@ -125,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function updateDashboard(data) {
+    function updateCurrent(data) {
         const colours = {
             BIOMASS: '#008043', // Green for biomass
             CCGT: '#AAA189', // Some colour I can't describe
@@ -331,6 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial fetch
     fetchGridData();
+    fetchPast48HoursData();
 
     // Refresh data every 30 minutes
     setInterval(fetchGridData, 30 * 60 * 1000);
