@@ -1,7 +1,90 @@
 const apiUrl = 'http://localhost:3000/current'; // Run wGrid-Backend locally, I'll move this to repo.c48.uk once the backend is nearly done
 const past48HrsApiUrl = 'http://localhost:3000/past-48-hrs';
 
+const colours = {
+    BIOMASS: '#008043', // Green for biomass
+    CCGT: '#AAA189', // Some colour I can't describe
+    INTELEC: 'rgba(169,122,176,1)', // Purple-ish? Stolen from EnergyDashboard anyway
+    INTEW: 'rgba(169,122,176,1)',
+    INTFR: 'rgba(169,122,176,1)',
+    INTGRNL: 'rgba(169,122,176,1)',
+    INTIFA2: 'rgba(169,122,176,1)',
+    INTIRL: 'rgba(169,122,176,1)',
+    INTNED: 'rgba(169,122,176,1)',
+    INTNEM: 'rgba(169,122,176,1)',
+    INTNSL: 'rgba(169,122,176,1)',
+    INTVKL: 'rgba(169,122,176,1)',
+    NPSHYD: '#1878EA', // Blue for hydro
+    NUCLEAR: '#9D71F7', // Pinkish-purple
+    OCGT: '#AAA189', // Some colour I can't describe
+    OIL: '#584745', // Brown for oil
+    OTHER: '#808080', // Grey for other
+    PS: '#2B3CD8', // Dark blue for pumped storage
+    WIND: '#69D6F8', // Light blue
+    SOLAR: '#FFC700' // Yellow
+};
+
+const friendlyNames = {
+    BIOMASS: 'Biomass',
+    CCGT: 'Gas',
+    COAL: 'Coal',
+    INTELEC: 'Eleclink (France, 1GW)',
+    INTEW: 'East-West (Ireland, 500MW)',
+    INTFR: 'IFA (France, 2GW)',
+    INTGRNL: 'Greenlink (Ireland, 500MW)',
+    INTIFA2: 'IFA2 (France, 1GW)',
+    INTIRL: 'Moyle (NI, 500MW)',
+    INTNED: 'BritNed (Netherlands, 1GW)',
+    INTNEM: 'Nemo Link (Belgium, 1GW)',
+    INTNSL: 'North Sea Link (Norway, 1.4GW)',
+    INTVKL: 'Viking Link (Denmark, 1.4GW)',
+    NPSHYD: 'Hydro',
+    NUCLEAR: 'Nuclear',
+    OCGT: 'Open Cycle Gas',
+    OIL: 'Oil',
+    OTHER: 'Other',
+    PS: 'Pumped Storage',
+    WIND: 'Wind',
+    SOLAR: 'Solar'
+};
+
 document.addEventListener('DOMContentLoaded', () => {
+
+    function removeCO2andConsolidateImports(data) {
+        // Define keys to amalgamate into "Imports"
+        const importKeys = [
+            'INTELEC', 'INTEW', 'INTFR', 'INTGRNL', 'INTIFA2',
+            'INTIRL', 'INTNED', 'INTNEM', 'INTNSL', 'INTVKL'
+        ];
+
+        // Exclude CO2-related keys
+        const excludedKeys = ['CO2', 'CO2_FORECAST', 'CO2_INDEX'];
+
+        // Process data to create a combined "Imports" category
+        const seriesData = [];
+        const importData = data.map((entry) =>
+            importKeys.reduce((sum, key) => sum + (entry.data[key] || 0), 0)
+        );
+
+        // Add "Imports" as a single category
+        seriesData.push({
+            name: 'Imports',
+            data: importData,
+            color: '#A97AB0' // Purple for imports
+        });
+
+        // Add the remaining categories, excluding the imports and CO2-related keys
+        Object.keys(data[0].data)
+            .filter((key) => !importKeys.includes(key) && !excludedKeys.includes(key))
+            .forEach((key) => {
+                seriesData.push({
+                    name: key,
+                    data: data.map((entry) => entry.data[key]),
+                });
+            });
+
+        return seriesData;
+    }
 
     function updateLoadingStatus(status) {
         var loadingStatusElements = document.getElementsByClassName('loading-status');
@@ -25,41 +108,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+
     function renderPast48HoursChart(data) {
         const categories = data.map((entry) => new Date(entry.timestamp).toLocaleString());
+        const seriesData = removeCO2andConsolidateImports(data);
 
-        // Define keys to amalgamate into "Imports"
-        const importKeys = [
-            'INTELEC', 'INTEW', 'INTFR', 'INTGRNL', 'INTIFA2',
-            'INTIRL', 'INTNED', 'INTNEM', 'INTNSL', 'INTVKL'
-        ];
-    
-        // Exclude CO2-related keys
-        const excludedKeys = ['CO2', 'CO2_FORECAST', 'CO2_INDEX'];
-    
-        // Process data to create a combined "Imports" category
-        const seriesData = [];
-        const importData = data.map((entry) =>
-            importKeys.reduce((sum, key) => sum + (entry.data[key] || 0), 0)
-        );
-    
-        // Add "Imports" as a single category
-        seriesData.push({
-            name: 'Imports',
-            data: importData,
-            color: '#A97AB0' // Purple for imports
-        });
-    
-        // Add the remaining categories, excluding the imports and CO2-related keys
-        Object.keys(data[0].data)
-            .filter((key) => !importKeys.includes(key) && !excludedKeys.includes(key))
-            .forEach((key) => {
-                seriesData.push({
-                    name: key,
-                    data: data.map((entry) => entry.data[key]),
-                });
-            });
-    
         // Render the chart
         Highcharts.chart('past-day-chart-container', {
             chart: {
@@ -99,12 +152,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderCO2Chart(data) {
         const categories = data.map((entry) => new Date(entry.timestamp).toLocaleString());
-    
+
         // Extract CO₂-related data
         const co2Data = data.map((entry) => entry.data.CO2);
         const co2ForecastData = data.map((entry) => entry.data.CO2_FORECAST);
         const co2IndexData = data.map((entry) => entry.data.CO2_INDEX);
-    
+
         // Render the CO₂ chart
         Highcharts.chart('co2-chart-container', {
             chart: {
@@ -154,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 enabled: false,
             },
         });
-    
+
         // Optional: Render CO₂ index as a categorical data series (if meaningful)
         console.log('CO₂ Index Data:', co2IndexData);
     }
@@ -276,53 +329,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function updateCurrent(data) {
-        const colours = {
-            BIOMASS: '#008043', // Green for biomass
-            CCGT: '#AAA189', // Some colour I can't describe
-            INTELEC: 'rgba(169,122,176,1)', // Purple-ish? Stolen from EnergyDashboard anyway
-            INTEW: 'rgba(169,122,176,1)',
-            INTFR: 'rgba(169,122,176,1)',
-            INTGRNL: 'rgba(169,122,176,1)',
-            INTIFA2: 'rgba(169,122,176,1)',
-            INTIRL: 'rgba(169,122,176,1)',
-            INTNED: 'rgba(169,122,176,1)',
-            INTNEM: 'rgba(169,122,176,1)',
-            INTNSL: 'rgba(169,122,176,1)',
-            INTVKL: 'rgba(169,122,176,1)',
-            NPSHYD: '#1878EA', // Blue for hydro
-            NUCLEAR: '#9D71F7', // Pinkish-purple
-            OCGT: '#AAA189', // Some colour I can't describe
-            OIL: '#584745', // Brown for oil
-            OTHER: '#808080', // Grey for other
-            PS: '#2B3CD8', // Dark blue for pumped storage
-            WIND: '#69D6F8', // Light blue
-            SOLAR: '#FFC700' // Yellow
-        };
-
-        const friendlyNames = {
-            BIOMASS: 'Biomass',
-            CCGT: 'Gas',
-            COAL: 'Coal',
-            INTELEC: 'Eleclink (France, 1GW)',
-            INTEW: 'East-West (Ireland, 500MW)',
-            INTFR: 'IFA (France, 2GW)',
-            INTGRNL: 'Greenlink (Ireland, 500MW)',
-            INTIFA2: 'IFA2 (France, 1GW)',
-            INTIRL: 'Moyle (NI, 500MW)',
-            INTNED: 'BritNed (Netherlands, 1GW)',
-            INTNEM: 'Nemo Link (Belgium, 1GW)',
-            INTNSL: 'North Sea Link (Norway, 1.4GW)',
-            INTVKL: 'Viking Link (Denmark, 1.4GW)',
-            NPSHYD: 'Hydro',
-            NUCLEAR: 'Nuclear',
-            OCGT: 'Open Cycle Gas',
-            OIL: 'Oil',
-            OTHER: 'Other',
-            PS: 'Pumped Storage',
-            WIND: 'Wind',
-            SOLAR: 'Solar'
-        };
-
         const categories = Object.keys(data).filter(
             (key) => key !== 'CO2' && key !== 'CO2_FORECAST' && key !== 'CO2_INDEX'
         );
@@ -357,34 +363,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 key === 'Renewable'
                     ? '#69D6F8' // Light blue for renewable
                     : key === 'Low-Carbon'
-                    ? '#9D71F7' // Purple for low-carbon
-                    : key === 'Fossil Fuels'
-                    ? '#AAA189' // Grey-brown for fossil fuels
-                    : '#A97AB0' // Purple for imports
+                        ? '#9D71F7' // Purple for low-carbon
+                        : key === 'Fossil Fuels'
+                            ? '#AAA189' // Grey-brown for fossil fuels
+                            : '#A97AB0' // Purple for imports
         }));
 
 
-        var co2IndexElement = document.getElementById('co2-index');
-        var co2IntensityElement = document.getElementById('co2-intensity');
+        const co2IndexElement = document.getElementById('co2-index');
+        const co2IntensityElement = document.getElementById('co2-intensity');
 
         // Update CO2 intensity and index
         co2IntensityElement.textContent = `${data.CO2} gCO₂/kWh`;
         co2IndexElement.textContent = data.CO2_INDEX;
         if (data.CO2_INDEX == "very low") {
-           co2IndexElement.style.color = "darkgreen";
-           co2IntensityElement.style.color = "darkgreen";
+            co2IndexElement.style.color = "darkgreen";
+            co2IntensityElement.style.color = "darkgreen";
         } else if (data.CO2_INDEX == "low") {
-           co2IndexElement.style.color = "green";
-           co2IntensityElement.style.color = "green";
+            co2IndexElement.style.color = "green";
+            co2IntensityElement.style.color = "green";
         } else if (data.CO2_INDEX == "moderate") {
-           co2IndexElement.style.color = "yellow";
-           co2IntensityElement.style.color = "yellow";
+            co2IndexElement.style.color = "yellow";
+            co2IntensityElement.style.color = "yellow";
         } else if (data.CO2_INDEX == "high") {
-           co2IndexElement.style.color = "orange";
-           co2IntensityElement.style.color = "orange";
+            co2IndexElement.style.color = "orange";
+            co2IntensityElement.style.color = "orange";
         } else if (data.CO2_INDEX == "very high") {
-           co2IndexElement.style.color = "red";
-           co2IntensityElement.style.color = "red";
+            co2IndexElement.style.color = "red";
+            co2IntensityElement.style.color = "red";
         }
 
         document.getElementById('demand').textContent = calculateDemand(data);
@@ -431,7 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             ]
         });
-        
+
         // Render Highcharts bar chart
         Highcharts.chart('bar-chart-container', {
             chart: {
@@ -476,12 +482,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             ]
         });
-        
+
     }
 
     // Initial fetch
     fetchGridData();
     fetchPast48HoursData();
+    fetchPastWeekData();
 
     // Refresh data every 30 minutes
     setInterval(fetchGridData, 30 * 60 * 1000);
