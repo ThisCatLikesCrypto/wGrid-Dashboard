@@ -1,5 +1,7 @@
 const apiUrl = 'http://localhost:3000/current'; // Run wGrid-Backend locally, I'll move this to repo.c48.uk once the backend is nearly done
 const past48HrsApiUrl = 'http://localhost:3000/past-48-hrs';
+const pastWeekApiUrl = 'http://localhost:3000/past-week-avg';
+const pastWeekLineApiUrl = 'http://localhost:3000/past-week';
 
 const colours = {
     BIOMASS: '#008043', // Green for biomass
@@ -48,7 +50,105 @@ const friendlyNames = {
     SOLAR: 'Solar'
 };
 
+
 document.addEventListener('DOMContentLoaded', () => {
+    Highcharts.setOptions({
+        chart: {
+            backgroundColor: '#1e1e1e',
+            style: {
+                fontFamily: 'Calibri, Carlito, sans-serif',
+                fontSize: '18px'
+            }
+        },
+        title: {
+            style: {
+                color: '#ffffff'
+            }
+        },
+        subtitle: {
+            style: {
+                color: '#cccccc'
+            }
+        },
+        xAxis: {
+            gridLineColor: '#444444',
+            labels: {
+                style: {
+                    color: '#ffffff'
+                }
+            },
+            lineColor: '#444444',
+            minorGridLineColor: '#222222',
+            tickColor: '#444444',
+            title: {
+                style: {
+                    color: '#ffffff'
+                }
+            }
+        },
+        yAxis: {
+            gridLineColor: '#444444',
+            labels: {
+                style: {
+                    color: '#ffffff'
+                }
+            },
+            lineColor: '#444444',
+            minorGridLineColor: '#222222',
+            tickColor: '#444444',
+            tickWidth: 1,
+            title: {
+                style: {
+                    color: '#ffffff'
+                }
+            }
+        },
+        tooltip: {
+            backgroundColor: 'rgba(33, 33, 33, 0.85)',
+            style: {
+                color: '#ffffff'
+            }
+        },
+        plotOptions: {
+            series: {
+                dataLabels: {
+                    color: '#ffffff'
+                },
+                marker: {
+                    lineColor: '#333333'
+                }
+            },
+            pie: {
+                dataLabels: {
+                    style: {
+                        color: '#ffffff'
+                    }
+                }
+            }
+        },
+        legend: {
+            backgroundColor: 'rgba(30, 30, 30, 0.85)',
+            itemStyle: {
+                color: '#ffffff'
+            },
+            itemHoverStyle: {
+                color: '#dddddd'
+            },
+            itemHiddenStyle: {
+                color: '#444444'
+            }
+        },
+        credits: {
+            style: {
+                color: '#666666'
+            }
+        },
+        labels: {
+            style: {
+                color: '#ffffff'
+            }
+        }
+    });
 
     function removeCO2andConsolidateImports(data) {
         // Define keys to amalgamate into "Imports"
@@ -86,10 +186,44 @@ document.addEventListener('DOMContentLoaded', () => {
         return seriesData;
     }
 
+    function calculateDemand(data) {
+        const demand = data.WIND + data.SOLAR + data.NPSHYD + data.NUCLEAR + data.PS + data.BIOMASS + data.CCGT + data.COAL + data.OIL + data.INTELEC + data.INTFR + data.INTNED + data.INTNSL + data.INTNEM + data.INTGRNL + data.INTIRL + data.INTIFA2 + data.INTVKL;
+        return demand;
+    }
+
     function updateLoadingStatus(status) {
         var loadingStatusElements = document.getElementsByClassName('loading-status');
         for (var i = 0; i < loadingStatusElements.length; i++) {
             loadingStatusElements[i].textContent = status;
+        }
+    }
+
+    // Fetches/triggers
+    async function fetchPastWeekData() {
+        try {
+            updateLoadingStatus('Fetching past week data...');
+            const response = await fetch(pastWeekApiUrl);
+            if (!response.ok) throw new Error('Failed to fetch past week data');
+            const data = await response.json();
+            renderPastWeekPie(data);
+            updateLoadingStatus('Past data loaded successfully');
+        } catch (error) {
+            console.error('Error fetching past week data:', error);
+            updateLoadingStatus('Error loading past data');
+        }
+    }
+
+    async function fetchPastWeekLine() {
+        try {
+            updateLoadingStatus('Fetching past week data...');
+            const response = await fetch(pastWeekLineApiUrl);
+            if (!response.ok) throw new Error('Failed to fetch past week data');
+            const data = await response.json();
+            renderPastWeekLine(data);
+            updateLoadingStatus('Past data loaded successfully');
+        } catch (error) {
+            console.error('Error fetching past week data:', error);
+            updateLoadingStatus('Error loading past data');
         }
     }
 
@@ -108,6 +242,110 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    async function fetchGridData() {
+        try {
+            updateLoadingStatus('Fetching current data...');
+            const response = await fetch(apiUrl);
+            if (!response.ok) throw new Error('Failed to fetch current data');
+            const data = await response.json();
+            updateLoadingStatus('200 OK');
+            updateCurrent(data);
+        } catch (error) {
+            console.error('Error fetching grid data:', error);
+        }
+    }
+
+    // Charts
+    function renderPastWeekPie(data) {
+        const categories = Object.keys(data).filter(
+            (key) => key !== 'CO2' && key !== 'CO2_FORECAST' && key !== 'CO2_INDEX'
+        );
+
+        const chartData = categories.map((key) => ({
+            name: friendlyNames[key] || key, // Use friendly name if available
+            y: data[key],
+            color: colours[key] || '#808080' // Default to grey if color is not mapped
+        }));
+
+        Highcharts.chart('past-week-chart-container', {
+            chart: {
+                type: 'pie'
+            },
+            title: {
+                text: "Past Week's Power Generation"
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.y} MW</b> ({point.percentage:.1f}%)'
+            },
+            accessibility: {
+                point: {
+                    valueSuffix: ' MW'
+                }
+            },
+            plotOptions: {
+                pie: {
+                    size: '90%',
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: false
+                    },
+                    showInLegend: true
+                }
+            },
+            credits: {
+                enabled: false
+            },
+            series: [
+                {
+                    name: 'Power Sources',
+                    colorByPoint: false, // Use specified colors
+                    data: chartData
+                }
+            ]
+        });
+    }
+
+    function renderPastWeekLine(data) {
+        const categories = data.map((entry) => new Date(entry.timestamp).toLocaleString());
+        const seriesData = removeCO2andConsolidateImports(data);
+
+        // Render the chart
+        Highcharts.chart('past-week-line-chart-container', {
+            chart: {
+                type: 'line',
+            },
+            title: {
+                text: 'Power Generation (Past Week)',
+            },
+            xAxis: {
+                categories,
+                title: {
+                    text: 'Timestamp',
+                },
+            },
+            yAxis: {
+                title: {
+                    text: 'Power (MW)',
+                },
+            },
+            tooltip: {
+                shared: true,
+                valueSuffix: ' MW',
+            },
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: true,
+                    },
+                },
+            },
+            series: seriesData,
+            credits: {
+                enabled: false,
+            },
+        });
+    }
 
     function renderPast48HoursChart(data) {
         const categories = data.map((entry) => new Date(entry.timestamp).toLocaleString());
@@ -212,122 +450,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('CO₂ Index Data:', co2IndexData);
     }
 
-    function calculateDemand(data) {
-        const demand = data.WIND + data.SOLAR + data.NPSHYD + data.NUCLEAR + data.PS + data.BIOMASS + data.CCGT + data.COAL + data.OIL + data.INTELEC + data.INTFR + data.INTNED + data.INTNSL + data.INTNEM + data.INTGRNL + data.INTIRL + data.INTIFA2 + data.INTVKL;
-        return demand;
-    }
-
-    async function fetchGridData() {
-        try {
-            updateLoadingStatus('Fetching...');
-            const response = await fetch(apiUrl);
-            if (!response.ok) throw new Error('Network response was not ok');
-            const data = await response.json();
-            updateLoadingStatus('200 OK');
-            updateCurrent(data);
-        } catch (error) {
-            console.error('Error fetching grid data:', error);
-        }
-    }
-
-    Highcharts.setOptions({
-        chart: {
-            backgroundColor: '#1e1e1e',
-            style: {
-                fontFamily: 'Calibri, Carlito, sans-serif',
-                fontSize: '18px'
-            }
-        },
-        title: {
-            style: {
-                color: '#ffffff'
-            }
-        },
-        subtitle: {
-            style: {
-                color: '#cccccc'
-            }
-        },
-        xAxis: {
-            gridLineColor: '#444444',
-            labels: {
-                style: {
-                    color: '#ffffff'
-                }
-            },
-            lineColor: '#444444',
-            minorGridLineColor: '#222222',
-            tickColor: '#444444',
-            title: {
-                style: {
-                    color: '#ffffff'
-                }
-            }
-        },
-        yAxis: {
-            gridLineColor: '#444444',
-            labels: {
-                style: {
-                    color: '#ffffff'
-                }
-            },
-            lineColor: '#444444',
-            minorGridLineColor: '#222222',
-            tickColor: '#444444',
-            tickWidth: 1,
-            title: {
-                style: {
-                    color: '#ffffff'
-                }
-            }
-        },
-        tooltip: {
-            backgroundColor: 'rgba(33, 33, 33, 0.85)',
-            style: {
-                color: '#ffffff'
-            }
-        },
-        plotOptions: {
-            series: {
-                dataLabels: {
-                    color: '#ffffff'
-                },
-                marker: {
-                    lineColor: '#333333'
-                }
-            },
-            pie: {
-                dataLabels: {
-                    style: {
-                        color: '#ffffff'
-                    }
-                }
-            }
-        },
-        legend: {
-            backgroundColor: 'rgba(30, 30, 30, 0.85)',
-            itemStyle: {
-                color: '#ffffff'
-            },
-            itemHoverStyle: {
-                color: '#dddddd'
-            },
-            itemHiddenStyle: {
-                color: '#444444'
-            }
-        },
-        credits: {
-            style: {
-                color: '#666666'
-            }
-        },
-        labels: {
-            style: {
-                color: '#ffffff'
-            }
-        }
-    });
-
     function updateCurrent(data) {
         const categories = Object.keys(data).filter(
             (key) => key !== 'CO2' && key !== 'CO2_FORECAST' && key !== 'CO2_INDEX'
@@ -427,7 +549,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             },
             credits: {
-                enabled: false // Disable the Highcharts watermark
+                enabled: false
             },
             series: [
                 {
@@ -488,6 +610,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial fetch
     fetchGridData();
     fetchPast48HoursData();
+    fetchPastWeekData();
+    fetchPastWeekLine();
 
     // Refresh data every 30 minutes
     setInterval(fetchGridData, 30 * 60 * 1000);
