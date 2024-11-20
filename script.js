@@ -488,7 +488,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial fetch
     fetchGridData();
     fetchPast48HoursData();
-    fetchPastWeekData();
 
     // Refresh data every 30 minutes
     setInterval(fetchGridData, 30 * 60 * 1000);
