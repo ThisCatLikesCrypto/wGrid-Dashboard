@@ -5,67 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>wGrid Dashboard</title>
-    <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
-    <script src="https://code.highcharts.com/modules/exporting.js"></script>
-    <script src="https://code.highcharts.com/modules/export-data.js"></script>
-    <script src="https://code.highcharts.com/modules/offline-exporting.js"></script>
-    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
 </head>
 
 <body>
-    <header>
-        <div class="content">
-            <h1>wGrid Dashboard <sub style="font-size: 0.5em;">v0.0.1</sub></h1>
-        </div>
-    </header>
-    <main>
-        <div class="maindivdiv">
-            <div>
-                <div id="chart-container" class="pie-chart"></div>
+    <div id="dashboard">
+        <h1>wGrid Dashboard</h1>
+        <div class="chart-container">
+            <div class="chart-box">
+                <canvas id="generationPieChart"></canvas>
             </div>
-            <div>
-                <div id="bar-chart-container"></div>
+            <div class="chart-box">
+                <canvas id="categoryBarChart"></canvas>
             </div>
-            <div id="loading">
-                <h1 class="loading-indicator">Loading...</h1><br>
-                <p class="loading-status"></p>
-            </div>
-            <div id="overview">
-                <div> 
-                    <b>Carbon Intensity: </b><br>
-                    <h3><span id="co2-intensity"></span></h3>
-                </div>
-                <div>
-                    <b>CO2 Index: </b><br>
-                    <h3><span id="co2-index"></span></h3>
-                </div>
-                <div>
-                    <b>Demand: </b><br>
-                    <h3><span id="demand"></span> MW</h3>
-                </div>
+            <div class="chart-box">
+                <canvas id="demandsPieChart"></canvas>
             </div>
         </div>
-        <br>
-        <div class="maindivdiv">
-            <div>
-                <div id="past-day-chart-container"></div>
-            </div>
-            <div>
-                <div id="co2-chart-container"></div>
-            </div>
-        </div>
-        <div class="maindivdiv" id="past-week-div">
-            <div>
-                <div id="past-week-chart-container" class="pie-chart"></div>
-            </div>
-            <div>
-                <div id="past-week-line-chart-container"></div>
-            </div>
-        </div>
-    </main>
-    <script src="script.js"></script>
+        <div id="co2-index">Loading CO2 Data...</div>
+    </div>
 </body>
 
 </html>

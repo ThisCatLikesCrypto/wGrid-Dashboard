@@ -1,12 +1,8 @@
-const apiUrl = 'http://localhost:3000/current'; // Run wGrid-Backend locally, I'll move this to repo.c48.uk once the backend is nearly done
-const past48HrsApiUrl = 'http://localhost:3000/past-48-hrs';
-const pastWeekApiUrl = 'http://localhost:3000/past-week-avg';
-const pastWeekLineApiUrl = 'http://localhost:3000/past-week';
-
 const colours = {
-    BIOMASS: '#008043', // Green for biomass
-    CCGT: '#AAA189', // Some colour I can't describe
-    INTELEC: 'rgba(169,122,176,1)', // Purple-ish? Stolen from EnergyDashboard anyway
+    BIOMASS: '#008043',
+    CCGT: '#AAA189',
+    COAL: '#6C4B41',
+    INTELEC: 'rgba(169,122,176,1)',
     INTEW: 'rgba(169,122,176,1)',
     INTFR: 'rgba(169,122,176,1)',
     INTGRNL: 'rgba(169,122,176,1)',
@@ -16,14 +12,14 @@ const colours = {
     INTNEM: 'rgba(169,122,176,1)',
     INTNSL: 'rgba(169,122,176,1)',
     INTVKL: 'rgba(169,122,176,1)',
-    NPSHYD: '#1878EA', // Blue for hydro
-    NUCLEAR: '#9D71F7', // Pinkish-purple
-    OCGT: '#AAA189', // Some colour I can't describe
-    OIL: '#584745', // Brown for oil
-    OTHER: '#808080', // Grey for other
-    PS: '#2B3CD8', // Dark blue for pumped storage
-    WIND: '#69D6F8', // Light blue
-    SOLAR: '#FFC700' // Yellow
+    NPSHYD: '#1878EA',
+    NUCLEAR: '#9D71F7',
+    OCGT: '#AAA189',
+    OIL: '#584745',
+    OTHER: '#808080',
+    PS: '#2B3CD8',
+    WIND: '#69D6F8',
+    SOLAR: '#FFC700'
 };
 
 const friendlyNames = {
@@ -50,569 +46,171 @@ const friendlyNames = {
     SOLAR: 'Solar'
 };
 
-
-document.addEventListener('DOMContentLoaded', () => {
-    Highcharts.setOptions({
-        chart: {
-            backgroundColor: '#1e1e1e',
-            style: {
-                fontFamily: 'Calibri, Carlito, sans-serif',
-                fontSize: '18px'
-            }
-        },
-        title: {
-            style: {
-                color: '#ffffff'
-            }
-        },
-        subtitle: {
-            style: {
-                color: '#cccccc'
-            }
-        },
-        xAxis: {
-            gridLineColor: '#444444',
-            labels: {
-                style: {
-                    color: '#ffffff'
-                }
-            },
-            lineColor: '#444444',
-            minorGridLineColor: '#222222',
-            tickColor: '#444444',
-            title: {
-                style: {
-                    color: '#ffffff'
-                }
-            }
-        },
-        yAxis: {
-            gridLineColor: '#444444',
-            labels: {
-                style: {
-                    color: '#ffffff'
-                }
-            },
-            lineColor: '#444444',
-            minorGridLineColor: '#222222',
-            tickColor: '#444444',
-            tickWidth: 1,
-            title: {
-                style: {
-                    color: '#ffffff'
-                }
-            }
-        },
-        tooltip: {
-            backgroundColor: 'rgba(33, 33, 33, 0.85)',
-            style: {
-                color: '#ffffff'
-            }
-        },
-        plotOptions: {
-            series: {
-                dataLabels: {
-                    color: '#ffffff'
-                },
-                marker: {
-                    lineColor: '#333333'
-                }
-            },
-            pie: {
-                dataLabels: {
-                    style: {
-                        color: '#ffffff'
-                    }
-                }
-            }
-        },
-        legend: {
-            backgroundColor: 'rgba(30, 30, 30, 0.85)',
-            itemStyle: {
-                color: '#ffffff'
-            },
-            itemHoverStyle: {
-                color: '#dddddd'
-            },
-            itemHiddenStyle: {
-                color: '#444444'
-            }
-        },
-        credits: {
-            style: {
-                color: '#666666'
-            }
-        },
-        labels: {
-            style: {
-                color: '#ffffff'
-            }
-        }
-    });
-
-    function removeCO2andConsolidateImports(data) {
-        // Define keys to amalgamate into "Imports"
-        const importKeys = [
-            'INTELEC', 'INTEW', 'INTFR', 'INTGRNL', 'INTIFA2',
-            'INTIRL', 'INTNED', 'INTNEM', 'INTNSL', 'INTVKL'
-        ];
-
-        // Exclude CO2-related keys
-        const excludedKeys = ['CO2', 'CO2_FORECAST', 'CO2_INDEX'];
-
-        // Process data to create a combined "Imports" category
-        const seriesData = [];
-        const importData = data.map((entry) =>
-            importKeys.reduce((sum, key) => sum + (entry.data[key] || 0), 0)
-        );
-
-        // Add "Imports" as a single category
-        seriesData.push({
-            name: 'Imports',
-            data: importData,
-            color: '#A97AB0' // Purple for imports
-        });
-
-        // Add the remaining categories, excluding the imports and CO2-related keys
-        Object.keys(data[0].data)
-            .filter((key) => !importKeys.includes(key) && !excludedKeys.includes(key))
-            .forEach((key) => {
-                seriesData.push({
-                    name: key,
-                    data: data.map((entry) => entry.data[key]),
-                });
-            });
-
-        return seriesData;
+async function fetchGridData() {
+    try {
+        const response = await fetch('http://localhost:3000/current');
+        if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        return null;
     }
+}
 
-    function calculateDemand(data) {
-        const demand = data.WIND + data.SOLAR + data.NPSHYD + data.NUCLEAR + data.PS + data.BIOMASS + data.CCGT + data.COAL + data.OIL + data.INTELEC + data.INTFR + data.INTNED + data.INTNSL + data.INTNEM + data.INTGRNL + data.INTIRL + data.INTIFA2 + data.INTVKL;
-        return demand;
-    }
+function separateNegativeValues(data) {
+    const negatives = {};
+    const positives = {};
 
-    function updateLoadingStatus(status) {
-        var loadingStatusElements = document.getElementsByClassName('loading-status');
-        for (var i = 0; i < loadingStatusElements.length; i++) {
-            loadingStatusElements[i].textContent = status;
+    for (const key in data) {
+        if (colours[key] && !["CO2", "CO2_INDEX", "CO2_FORECAST"].includes(key)) {
+            if (data[key] < 0) {
+                negatives[key] = data[key];
+            } else {
+                positives[key] = data[key];
+            }
         }
     }
 
-    // Fetches/triggers
-    async function fetchPastWeekData() {
-        try {
-            updateLoadingStatus('Fetching past week data...');
-            const response = await fetch(pastWeekApiUrl);
-            if (!response.ok) throw new Error('Failed to fetch past week data');
-            const data = await response.json();
-            renderPastWeekPie(data);
-            updateLoadingStatus('Past data loaded successfully');
-        } catch (error) {
-            console.error('Error fetching past week data:', error);
-            updateLoadingStatus('Error loading past data');
-        }
-    }
+    return { positives, negatives };
+}
 
-    async function fetchPastWeekLine() {
-        try {
-            updateLoadingStatus('Fetching past week data...');
-            const response = await fetch(pastWeekLineApiUrl);
-            if (!response.ok) throw new Error('Failed to fetch past week data');
-            const data = await response.json();
-            renderPastWeekLine(data);
-            updateLoadingStatus('Past data loaded successfully');
-        } catch (error) {
-            console.error('Error fetching past week data:', error);
-            updateLoadingStatus('Error loading past data');
-        }
-    }
+function renderPieChart(data, elementId, label, isNegative = false) {
+    const labels = Object.keys(data).map(key => friendlyNames[key] || key);
+    const values = Object.values(data);
+    const backgroundColors = Object.keys(data).map(key => colours[key]);
 
-    async function fetchPast48HoursData() {
-        try {
-            updateLoadingStatus('Fetching past 48 hours data...');
-            const response = await fetch(past48HrsApiUrl);
-            if (!response.ok) throw new Error('Failed to fetch past 48 hours data');
-            const data = await response.json();
-            renderPast48HoursChart(data);
-            renderCO2Chart(data); // CO₂ chart
-            updateLoadingStatus('Past data loaded successfully');
-        } catch (error) {
-            console.error('Error fetching past 48 hours data:', error);
-            updateLoadingStatus('Error loading past data');
-        }
-    }
-
-    async function fetchGridData() {
-        try {
-            updateLoadingStatus('Fetching current data...');
-            const response = await fetch(apiUrl);
-            if (!response.ok) throw new Error('Failed to fetch current data');
-            const data = await response.json();
-            updateLoadingStatus('200 OK');
-            updateCurrent(data);
-        } catch (error) {
-            console.error('Error fetching grid data:', error);
-        }
-    }
-
-    // Charts
-    function renderPastWeekPie(data) {
-        const categories = Object.keys(data).filter(
-            (key) => key !== 'CO2' && key !== 'CO2_FORECAST' && key !== 'CO2_INDEX'
-        );
-
-        const chartData = categories.map((key) => ({
-            name: friendlyNames[key] || key, // Use friendly name if available
-            y: data[key],
-            color: colours[key] || '#808080' // Default to grey if color is not mapped
-        }));
-
-        Highcharts.chart('past-week-chart-container', {
-            chart: {
-                type: 'pie'
-            },
-            title: {
-                text: "Past Week's Power Generation"
-            },
-            tooltip: {
-                pointFormat: '{series.name}: <b>{point.y} MW</b> ({point.percentage:.1f}%)'
-            },
-            accessibility: {
-                point: {
-                    valueSuffix: ' MW'
-                }
-            },
-            plotOptions: {
-                pie: {
-                    size: '90%',
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: false
-                    },
-                    showInLegend: true
-                }
-            },
-            credits: {
-                enabled: false
-            },
-            series: [
+    const ctx = document.getElementById(elementId).getContext('2d');
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels,
+            datasets: [
                 {
-                    name: 'Power Sources',
-                    colorByPoint: false, // Use specified colors
-                    data: chartData
-                }
-            ]
-        });
-    }
-
-    function renderPastWeekLine(data) {
-        const categories = data.map((entry) => new Date(entry.timestamp).toLocaleString());
-        const seriesData = removeCO2andConsolidateImports(data);
-
-        // Render the chart
-        Highcharts.chart('past-week-line-chart-container', {
-            chart: {
-                type: 'line',
-            },
-            title: {
-                text: 'Power Generation (Past Week)',
-            },
-            xAxis: {
-                categories,
-                title: {
-                    text: 'Timestamp',
-                },
-            },
-            yAxis: {
-                title: {
-                    text: 'Power (MW)',
-                },
-            },
-            tooltip: {
-                shared: true,
-                valueSuffix: ' MW',
-            },
-            plotOptions: {
-                line: {
-                    dataLabels: {
-                        enabled: true,
-                    },
-                },
-            },
-            series: seriesData,
-            credits: {
-                enabled: false,
-            },
-        });
-    }
-
-    function renderPast48HoursChart(data) {
-        const categories = data.map((entry) => new Date(entry.timestamp).toLocaleString());
-        const seriesData = removeCO2andConsolidateImports(data);
-
-        // Render the chart
-        Highcharts.chart('past-day-chart-container', {
-            chart: {
-                type: 'line',
-            },
-            title: {
-                text: 'Power Generation (Past 48 Hours)',
-            },
-            xAxis: {
-                categories,
-                title: {
-                    text: 'Timestamp',
-                },
-            },
-            yAxis: {
-                title: {
-                    text: 'Power (MW)',
-                },
-            },
-            tooltip: {
-                shared: true,
-                valueSuffix: ' MW',
-            },
-            plotOptions: {
-                line: {
-                    dataLabels: {
-                        enabled: true,
-                    },
-                },
-            },
-            series: seriesData,
-            credits: {
-                enabled: false,
-            },
-        });
-    }
-
-    function renderCO2Chart(data) {
-        const categories = data.map((entry) => new Date(entry.timestamp).toLocaleString());
-
-        // Extract CO₂-related data
-        const co2Data = data.map((entry) => entry.data.CO2);
-        const co2ForecastData = data.map((entry) => entry.data.CO2_FORECAST);
-        const co2IndexData = data.map((entry) => entry.data.CO2_INDEX);
-
-        // Render the CO₂ chart
-        Highcharts.chart('co2-chart-container', {
-            chart: {
-                type: 'line',
-            },
-            title: {
-                text: 'CO₂ Intensity and Forecast (Past 48 Hours)',
-            },
-            xAxis: {
-                categories,
-                title: {
-                    text: 'Timestamp',
-                },
-            },
-            yAxis: {
-                title: {
-                    text: 'CO₂ Intensity (gCO₂/kWh)',
-                },
-                labels: {
-                    format: '{value} gCO₂/kWh',
-                },
-            },
-            tooltip: {
-                shared: true,
-                pointFormat: '<b>{point.y} gCO₂/kWh</b>',
-            },
-            plotOptions: {
-                line: {
-                    dataLabels: {
-                        enabled: true,
-                    },
-                },
-            },
-            series: [
-                {
-                    name: 'CO₂ Intensity',
-                    data: co2Data,
-                    color: 'green',
-                },
-                {
-                    name: 'CO₂ Forecast',
-                    data: co2ForecastData,
-                    color: 'blue',
+                    label,
+                    data: values,
+                    backgroundColor: backgroundColors,
                 },
             ],
-            credits: {
-                enabled: false,
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        color: isNegative ? '#FF4500' : '#00ffff', // Red for demands, Aqua for generation
+                    },
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (context) => `${context.label}: ${Math.abs(context.raw)} MW`,
+                    },
+                },
             },
-        });
+        },
+    });
+}
 
-        // Optional: Render CO₂ index as a categorical data series (if meaningful)
-        console.log('CO₂ Index Data:', co2IndexData);
-    }
+function calculateCategories(data) {
+    const renewables = data.WIND + data.SOLAR;
+    const lowCarbon = data.BIOMASS + data.NUCLEAR;
+    const fossilFuels = data.CCGT + data.COAL + data.OIL + data.OCGT;
+    const imports =
+        (data.INTELEC ?? 0) +
+        (data.INTEW ?? 0) +
+        (data.INTFR ?? 0) +
+        (data.INTGRNL ?? 0) +
+        (data.INTIFA2 ?? 0) +
+        (data.INTIRL ?? 0) +
+        (data.INTNED ?? 0) +
+        (data.INTNEM ?? 0) +
+        (data.INTNSL ?? 0) +
+        (data.INTVKL ?? 0);
 
-    function updateCurrent(data) {
-        const categories = Object.keys(data).filter(
-            (key) => key !== 'CO2' && key !== 'CO2_FORECAST' && key !== 'CO2_INDEX'
-        );
+    return { renewables, lowCarbon, fossilFuels, imports };
+}
 
-        const chartData = categories.map((key) => ({
-            name: friendlyNames[key] || key, // Use friendly name if available
-            y: data[key],
-            color: colours[key] || '#808080' // Default to grey if color is not mapped
-        }));
+function renderBarChart(categories) {
+    const ctx = document.getElementById('categoryBarChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Renewables', 'Low-Carbon', 'Fossil Fuels', 'Imports'],
+            datasets: [
+                {
+                    label: 'Category Breakdown (MW)',
+                    data: [
+                        categories.renewables,
+                        categories.lowCarbon,
+                        categories.fossilFuels,
+                        categories.imports,
+                    ],
+                    backgroundColor: ['#36A2EB', '#4BC0C0', '#FF6384', '#9966FF'],
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false,
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (context) => `${context.raw} MW`,
+                    },
+                },
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Power (MW)',
+                        color: '#00ffff', // Aqua text for axis title
+                    },
+                },
+                x: {
+                    ticks: {
+                        color: '#00ffff', // Aqua text for x-axis
+                    },
+                },
+            },
+        },
+    });
+}
 
-        // Aggregate data for bar chart
-        const aggregatedData = {
-            Renewable: data.WIND + data.SOLAR + data.NPSHYD,
-            'Low-Carbon': data.NUCLEAR + data.PS + data.BIOMASS,
-            'Fossil Fuels': data.CCGT + data.COAL + data.OIL,
-            Imports:
-                data.INTELEC +
-                data.INTFR +
-                data.INTNED +
-                data.INTNSL +
-                data.INTNEM +
-                data.INTGRNL +
-                data.INTIRL +
-                data.INTIFA2 +
-                data.INTVKL
-        };
+function updateCO2Info(data) {
+    const co2Index = document.getElementById('co2-index');
+    co2Index.classList.add('aqua-text'); // Apply aqua text style
+    co2Index.textContent = `CO2 Intensity: ${data.CO2} gCO2/kWh (${data.CO2_INDEX.toUpperCase()})`;
+}
 
-        const barChartData = Object.keys(aggregatedData).map((key) => ({
-            name: key,
-            y: aggregatedData[key],
-            color:
-                key === 'Renewable'
-                    ? '#69D6F8' // Light blue for renewable
-                    : key === 'Low-Carbon'
-                        ? '#9D71F7' // Purple for low-carbon
-                        : key === 'Fossil Fuels'
-                            ? '#AAA189' // Grey-brown for fossil fuels
-                            : '#A97AB0' // Purple for imports
-        }));
+async function initialiseDashboard() {
+    const data = await fetchGridData();
+    if (data) {
+        const { positives, negatives } = separateNegativeValues(data);
 
+        // Render generation pie chart (positives)
+        renderPieChart(positives, 'generationPieChart', 'Generation Sources');
 
-        const co2IndexElement = document.getElementById('co2-index');
-        const co2IntensityElement = document.getElementById('co2-intensity');
+        console.log(positives);
+        console.log(negatives);
 
-        // Update CO2 intensity and index
-        co2IntensityElement.textContent = `${data.CO2} gCO₂/kWh`;
-        co2IndexElement.textContent = data.CO2_INDEX;
-        if (data.CO2_INDEX == "very low") {
-            co2IndexElement.style.color = "darkgreen";
-            co2IntensityElement.style.color = "darkgreen";
-        } else if (data.CO2_INDEX == "low") {
-            co2IndexElement.style.color = "green";
-            co2IntensityElement.style.color = "green";
-        } else if (data.CO2_INDEX == "moderate") {
-            co2IndexElement.style.color = "yellow";
-            co2IntensityElement.style.color = "yellow";
-        } else if (data.CO2_INDEX == "high") {
-            co2IndexElement.style.color = "orange";
-            co2IntensityElement.style.color = "orange";
-        } else if (data.CO2_INDEX == "very high") {
-            co2IndexElement.style.color = "red";
-            co2IntensityElement.style.color = "red";
+        // Render demands pie chart (negatives)
+        if (Object.keys(negatives).length > 0) {
+            renderPieChart(negatives, 'demandsPieChart', 'Demands', true);
         }
 
-        document.getElementById('demand').textContent = calculateDemand(data);
-
-        document.getElementById('loading').style.display = 'none';
-
-        document.getElementById('overview').style.display = 'flex';
-
-        // Render Highcharts pie chart
-        Highcharts.chart('chart-container', {
-            chart: {
-                type: 'pie'
-            },
-            title: {
-                text: null // Removes the title
-            },
-            tooltip: {
-                pointFormat: '{series.name}: <b>{point.y} MW</b> ({point.percentage:.1f}%)'
-            },
-            accessibility: {
-                point: {
-                    valueSuffix: ' MW'
-                }
-            },
-            plotOptions: {
-                pie: {
-                    size: '90%',
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: false
-                    },
-                    showInLegend: true
-                }
-            },
-            credits: {
-                enabled: false
-            },
-            series: [
-                {
-                    name: 'Power Sources',
-                    colorByPoint: false, // Use specified colors
-                    data: chartData
-                }
-            ]
-        });
-
-        // Render Highcharts bar chart
-        Highcharts.chart('bar-chart-container', {
-            chart: {
-                type: 'column'
-            },
-            title: {
-                text: null
-            },
-            xAxis: {
-                categories: Object.keys(aggregatedData),
-                title: {
-                    text: null
-                }
-            },
-            yAxis: {
-                min: 0,
-                title: {
-                    text: 'Power (MW)',
-                    align: 'high'
-                },
-                labels: {
-                    overflow: 'justify'
-                }
-            },
-            tooltip: {
-                valueSuffix: ' MW'
-            },
-            plotOptions: {
-                column: {
-                    dataLabels: {
-                        enabled: true
-                    }
-                }
-            },
-            credits: {
-                enabled: false // Disable the Highcharts watermark
-            },
-            series: [
-                {
-                    name: 'Power (MW)',
-                    data: barChartData
-                }
-            ]
-        });
-
+        const categories = calculateCategories(positives);
+        console.log(categories);
+        renderBarChart(categories);
+        updateCO2Info(data);
+    } else {
+        const co2Index = document.getElementById('co2-index');
+        co2Index.textContent = 'Failed to load data.';
     }
+}
 
-    // Initial fetch
-    fetchGridData();
-    fetchPast48HoursData();
-    fetchPastWeekData();
-    fetchPastWeekLine();
-
-    // Refresh data every 30 minutes
-    setInterval(fetchGridData, 30 * 60 * 1000);
-});
+// Initialise the dashboard
+initialiseDashboard();

@@ -1,82 +1,65 @@
-@import "https://code.highcharts.com/dashboards/css/dashboards.css";
+:root {
+    --rosewater: #f5e0dc;
+    --flamingo: #f2cdcd;
+    --pink: #f5c2e7;
+    --mauve: #cba6f7;
+    --red: #f38ba8;
+    --maroon: #eba0ac;
+    --peach: #fab387;
+    --yellow: #f9e2af;
+    --green: #a6e3a1;
+    --teal: #94e2d5;
+    --sky: #89dceb;
+    --sapphire: #74c7ec;
+    --blue: #89b4fa;
+    --lavender: #b4befe;
+    --text: aqua;
+    --subtext1: #bac2de;
+    --subtext0: #a6adc8;
+    --overlay2: #9399b2;
+    --overlay1: #7f849c;
+    --overlay0: #6c7086;
+    --surface2: #585b70;
+    --surface1: #45475a;
+    --surface0: #313244;
+    --base: #1e1e2e;
+    --mantle: #181825;
+    --crust: #11111b;
+    --inverted-text: var(--crust);
+    --selection-color: var(--mauve);
+}
 
 body {
-    font-family: Calibri, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #1e1e1e;
-    color: #f4f4f9;
+    font-family: Calibri, Carlito, sans-serif;
+    margin: 20px;
+    background-color: var(--base);
+    color: var(--text);
 }
 
-text.highcharts-legend-navigation{
-    fill: white;
-}
-
-.loading-indicator {
-    color: orange;
-}
-
-#loading {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-}
-
-header {
-    background-color: #052c50;
-    color: white;
-    padding: 0.5em;
-    text-align: center;
-}
-
-header .content {
-    max-width: 1000px;
-    margin: 0 auto;
-}
-
-main {
-    padding: 1em;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.pie-chart {
-    width: 100%;
+#dashboard {
     max-width: 900px;
-    height: 500px;
+    margin: auto;
 }
 
-#info {
+canvas {
+    margin-bottom: 30px;
+}
+
+#co2-index {
     text-align: center;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-top: 20px;
 }
 
-#info p {
-    margin: 0.5em 0;
-}
-
-.maindivdiv {
+.chart-container {
     display: flex;
-    justify-content: space-between; /* Horizontally center the inner divs */
-    flex-direction: row;
-    gap: 1em;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
 }
 
-.maindivdiv div {
-    flex: 1; /* Make the inner divs take up the same space */
-}
-
-#overview {
-    text-align: center;
-    font-size: 1.5em;
-    display: none;
-    flex-direction: column;
-}
-
-@media screen and (max-width: 1100px) {
-    .maindivdiv {
-        flex-direction: column; /* Change to a column layout */
-        text-align: center;
-    }
+.chart-box {
+    flex: 1 1 45%;
+    min-width: 300px;
 }
