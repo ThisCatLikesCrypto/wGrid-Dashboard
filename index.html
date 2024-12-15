@@ -12,19 +12,35 @@
 
 <body>
     <div id="dashboard">
-        <h1>wGrid Dashboard</h1>
-        <div class="chart-container">
-            <div class="chart-box">
-                <canvas id="generationPieChart"></canvas>
+        <div class="card centretext">
+            <h1>wGrid Dashboard</h1>
+            <h2>The UK's current electricity mix</h2>
+            <p>Data is updated every 30 minutes.</p>
+        </div>
+        <div class="upwidgets">
+            <div class="card centretext">
+                <h2>Demand</h2>
+                <p id="demand"></p>
             </div>
-            <div class="chart-box">
-                <canvas id="categoryBarChart"></canvas>
-            </div>
-            <div class="chart-box">
-                <canvas id="demandsPieChart"></canvas>
+            <div class="card centretext">
+                <h2>CO<sub>2</sub> Index</h2>
+                <p id="co2-index"></p>
             </div>
         </div>
-        <div id="co2-index">Loading CO2 Data...</div>
+        <div class="chart-container">
+            <div class="chart-box card">
+                <h3 class="centretext">Generation Sources</h3>
+                <canvas id="generationDoughnutChart"></canvas>
+            </div>
+            <div class="chart-box card">
+                <h3 class="centretext">Generation Categories</h3>
+                <canvas id="categoryBarChart"></canvas>
+            </div>
+            <div class="chart-box card">
+                <h3 class="centretext">Demands</h3>
+                <canvas id="demandsDoughnutChart"></canvas>
+            </div>
+        </div>
     </div>
 </body>
 

@@ -19,7 +19,9 @@ const colours = {
     OTHER: '#808080',
     PS: '#2B3CD8',
     WIND: '#69D6F8',
-    SOLAR: '#FFC700'
+    WIND_EMBEDDED: '#69D6F8',
+    SOLAR: '#FFC700',
+    SOLAR_EMBEDDED: '#FFC700',
 };
 
 const friendlyNames = {
@@ -43,12 +45,14 @@ const friendlyNames = {
     OTHER: 'Other',
     PS: 'Pumped Storage',
     WIND: 'Wind',
-    SOLAR: 'Solar'
+    SOLAR: 'Solar',
+    WIND_EMBEDDED: 'Wind (Embedded, estimated)',
+    SOLAR_EMBEDDED: 'Solar (Embedded, estimated)',
 };
 
 async function fetchGridData() {
     try {
-        const response = await fetch('http://localhost:3000/current');
+        const response = await fetch('https://repo.c48.uk/api/current');
         if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
         return await response.json();
     } catch (error) {
@@ -74,14 +78,14 @@ function separateNegativeValues(data) {
     return { positives, negatives };
 }
 
-function renderPieChart(data, elementId, label, isNegative = false) {
+function renderDoughnutChart(data, elementId, label, isNegative = false) {
     const labels = Object.keys(data).map(key => friendlyNames[key] || key);
     const values = Object.values(data);
     const backgroundColors = Object.keys(data).map(key => colours[key]);
 
     const ctx = document.getElementById(elementId).getContext('2d');
     new Chart(ctx, {
-        type: 'pie',
+        type: 'doughnut',
         data: {
             labels,
             datasets: [
@@ -96,10 +100,7 @@ function renderPieChart(data, elementId, label, isNegative = false) {
             responsive: true,
             plugins: {
                 legend: {
-                    position: 'right',
-                    labels: {
-                        color: isNegative ? '#FF4500' : '#00ffff', // Red for demands, Aqua for generation
-                    },
+                    display: false,
                 },
                 tooltip: {
                     callbacks: {
@@ -186,26 +187,42 @@ function updateCO2Info(data) {
     co2Index.textContent = `CO2 Intensity: ${data.CO2} gCO2/kWh (${data.CO2_INDEX.toUpperCase()})`;
 }
 
+function displayDemand(data) {
+    let demand = 0;
+
+    for (const key in data) {
+        if (colours[key] && !["CO2", "CO2_INDEX", "CO2_FORECAST"].includes(key)) {
+            demand += data[key];
+        }
+    }
+
+    document.getElementById('demand').textContent = `Demand: ${demand} MW`;
+}
+
 async function initialiseDashboard() {
     const data = await fetchGridData();
     if (data) {
         const { positives, negatives } = separateNegativeValues(data);
 
-        // Render generation pie chart (positives)
-        renderPieChart(positives, 'generationPieChart', 'Generation Sources');
+        // Render generation doughnut chart (positives)
+        renderDoughnutChart(positives, 'generationDoughnutChart', 'Generation Sources');
 
         console.log(positives);
         console.log(negatives);
+        console.log(Object.keys(negatives).length)
 
-        // Render demands pie chart (negatives)
+        // Render demands doughnut chart (negatives)
         if (Object.keys(negatives).length > 0) {
-            renderPieChart(negatives, 'demandsPieChart', 'Demands', true);
+            renderDoughnutChart(negatives, 'demandsDoughnutChart', 'Demands', true);
+        } else {
+            document.getElementById('demandsDoughnutChart').outerHTML = 'No Exports'; 
         }
 
         const categories = calculateCategories(positives);
         console.log(categories);
         renderBarChart(categories);
         updateCO2Info(data);
+        displayDemand(data);
     } else {
         const co2Index = document.getElementById('co2-index');
         co2Index.textContent = 'Failed to load data.';
