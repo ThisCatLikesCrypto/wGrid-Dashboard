@@ -113,7 +113,7 @@ function renderDoughnutChart(data, elementId, label, isNegative = false) {
 }
 
 function calculateCategories(data) {
-    const renewables = data.WIND + data.SOLAR;
+    const renewables = data.WIND + data.SOLAR + data.WIND_EMBEDDED + data.SOLAR_EMBEDDED;
     const lowCarbon = data.BIOMASS + data.NUCLEAR;
     const fossilFuels = data.CCGT + data.COAL + data.OIL + data.OCGT;
     const imports =
