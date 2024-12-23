@@ -52,7 +52,7 @@ canvas {
     margin-bottom: 30px;
 }
 
-#co2-index {
+.important-values {
     text-align: center;
     font-size: 1.2em;
     font-weight: bold;
@@ -63,7 +63,7 @@ canvas {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
-    justify-content: space-between;
+    justify-content: center;
 }
 
 .chart-box {
@@ -82,4 +82,8 @@ canvas {
     flex-wrap: wrap;
     gap: 20px;
     justify-content: center;
+}
+
+.takeupfullwidth {
+    max-width: 100% !important;
 }

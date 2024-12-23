@@ -7,6 +7,7 @@
     <title>wGrid Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
     <script src="script.js"></script>
 </head>
 
@@ -19,12 +20,12 @@
         </div>
         <div class="upwidgets">
             <div class="card centretext">
-                <h2>Demand</h2>
-                <p id="demand"></p>
+                <h2>CO<sub>2</sub> Index</h2>
+                <p class="important-values" id="co2-index"></p>
             </div>
             <div class="card centretext">
-                <h2>CO<sub>2</sub> Index</h2>
-                <p id="co2-index"></p>
+                <h2>Power</h2>
+                <p class="important-values" id="power-equation"></p>
             </div>
         </div>
         <div class="chart-container">
@@ -33,12 +34,19 @@
                 <canvas id="generationDoughnutChart"></canvas>
             </div>
             <div class="chart-box card">
+                <h3 class="centretext">Imports</h3>
+                <canvas id="importsDoughnutChart"></canvas>
+            </div>
+            <div class="chart-box card">
                 <h3 class="centretext">Generation Categories</h3>
                 <canvas id="categoryBarChart"></canvas>
             </div>
-            <div class="chart-box card">
-                <h3 class="centretext">Demands</h3>
-                <canvas id="demandsDoughnutChart"></canvas>
+        </div>
+        <br>
+        <div class="chart-container">
+            <div class="chart-box card takeupfullwidth">
+                <h3 class="centretext">Past 48 hours</h3>
+                <canvas id="past48Hours"></canvas>
             </div>
         </div>
     </div>
