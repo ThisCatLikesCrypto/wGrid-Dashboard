@@ -50,6 +50,16 @@ const friendlyNames = {
     SOLAR: 'Solar'
 };
 
+const co2Names = {
+    CO2: 'CO₂ (actual)',
+    CO2_FORECAST: 'CO₂ (forecast)'
+}
+
+const co2Colours = {
+    CO2: '#008043',
+    CO2_FORECAST: '#69D6F8'
+}
+
 async function fetchGridData() {
     try {
         const response = await fetch('https://repo.c48.uk/api/current');
@@ -149,6 +159,86 @@ function separateImports(data) {
         }
     }
     return imports;
+}
+
+function process48HourData(rawData) {
+    const timestamps = rawData.map(entry =>
+        new Date(entry.timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+    );
+
+    var energySources = Object.keys(rawData[0].data).filter(source =>
+        source !== 'SOLAR_EMBEDDED' && source !== 'CO2' && source !== 'CO2_INDEX' && source !== 'CO2_FORECAST'
+    );
+
+    // Combine WIND and WIND_EMBEDDED into one dataset
+    if (energySources.includes('WIND') && energySources.includes('WIND_EMBEDDED')) {
+        // Remove WIND_EMBEDDED from the sources array, as it will be combined with WIND
+        energySources = energySources.filter(source => source !== 'WIND_EMBEDDED');
+    }
+
+    const desiredOrder = [
+        'NUCLEAR',
+        'BIOMASS',
+        'HYDRO',
+        'WIND',
+        'SOLAR',
+        'GAS',
+        'IMPORTS'
+    ];
+
+    // Sort energy sources based on the predefined order
+    energySources = energySources.sort((a, b) => {
+        return desiredOrder.indexOf(a) - desiredOrder.indexOf(b);
+    });
+
+    const datasets = energySources.map(source => {
+        // Combine WIND and WIND_EMBEDDED if both are present
+        let data = rawData.map(entry => {
+            if (source === 'WIND') {
+                // Combine WIND and WIND_EMBEDDED data
+                return (entry.data['WIND'] || 0) + (entry.data['WIND_EMBEDDED'] || 0);
+            }
+            return entry.data[source] || 0;
+        });
+
+        return {
+            label: friendlyNames[source] || source,
+            data: data,
+            backgroundColor: colours[source] || 'rgba(128, 128, 128, 0.5)', // Default color if not defined
+            borderColor: colours[source] || 'rgba(128, 128, 128, 1)',
+            fill: true,
+            pointRadius: 0,
+        };
+    });
+
+    return { timestamps, datasets };
+}
+
+function process48HourCO2(rawData) {
+    const co2Timestamps = rawData.map(entry =>
+        new Date(entry.timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+    );
+
+    var energySources = Object.keys(rawData[0].data).filter(source =>
+        source == 'CO2' || source == 'CO2_FORECAST'
+    );
+
+    const co2Datasets = energySources.map(source => {
+        let data = rawData.map(entry => {
+            return entry.data[source] || 0;
+        });
+
+        return {
+            label: co2Names[source] || source,
+            data: data,
+            backgroundColor: co2Colours[source] || 'rgba(128, 128, 128, 0.5)', // Default color if not defined
+            borderColor: co2Colours[source] || 'rgba(128, 128, 128, 1)',
+            fill: false,
+            pointRadius: 0,
+        };
+    });
+
+    return { co2Timestamps, co2Datasets };
 }
 
 function renderDoughnutChart(data, elementId, label, isNegative = false) {
@@ -270,57 +360,7 @@ function renderBarChart(categories) {
     });
 }
 
-function renderStackedAreaChart(rawData, chartId) {
-    const timestamps = rawData.map(entry =>
-        new Date(entry.timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-    );
-
-    var energySources = Object.keys(rawData[0].data).filter(source =>
-        source !== 'SOLAR_EMBEDDED' && source !== 'CO2' && source !== 'CO2_INDEX' && source !== 'CO2_FORECAST'
-    );
-
-    // Combine WIND and WIND_EMBEDDED into one dataset
-    if (energySources.includes('WIND') && energySources.includes('WIND_EMBEDDED')) {
-        // Remove WIND_EMBEDDED from the sources array, as it will be combined with WIND
-        energySources = energySources.filter(source => source !== 'WIND_EMBEDDED');
-    }
-
-    const desiredOrder = [
-        'NUCLEAR',
-        'BIOMASS',
-        'HYDRO',
-        'WIND',
-        'SOLAR',
-        'GAS',
-        'IMPORTS'
-    ];
-
-    // Sort energy sources based on the predefined order
-    energySources = energySources.sort((a, b) => {
-        return desiredOrder.indexOf(a) - desiredOrder.indexOf(b);
-    });
-
-    const datasets = energySources.map(source => {
-        // Combine WIND and WIND_EMBEDDED if both are present
-        let data = rawData.map(entry => {
-            if (source === 'WIND') {
-                // Combine WIND and WIND_EMBEDDED data
-                return (entry.data['WIND'] || 0) + (entry.data['WIND_EMBEDDED'] || 0);
-            }
-            return entry.data[source] || 0;
-        });
-
-        return {
-            label: friendlyNames[source] || source,
-            data: data,
-            backgroundColor: colours[source] || 'rgba(128, 128, 128, 0.5)', // Default color if not defined
-            borderColor: colours[source] || 'rgba(128, 128, 128, 1)',
-            fill: true,
-            pointRadius: 0,
-        };
-    });
-
-
+function renderStackedAreaChart(timestamps, datasets, chartId) {
     const ctx = document.getElementById(chartId).getContext('2d');
     const config = {
         type: 'line',
@@ -365,6 +405,49 @@ function renderStackedAreaChart(rawData, chartId) {
     return new Chart(ctx, config);
 }
 
+function renderLineChart(timestamps, datasets, chartId) {
+    const ctx = document.getElementById(chartId).getContext('2d');
+    const config = {
+        type: 'line',
+        data: {
+            labels: timestamps,
+            datasets: datasets,
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'right',
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                datalabels: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Time',
+                    },
+                },
+                y: {
+                    stacked: false,
+                    title: {
+                        display: true,
+                        text: 'MW',
+                    },
+                },
+            },
+        },
+    };
+    // Render the chart
+    return new Chart(ctx, config);
+}
 
 function updateCO2Info(data) {
     const co2Index = document.getElementById('co2-index');
@@ -406,6 +489,12 @@ async function initialiseDashboard() {
         const categories = calculateCategories(positives);
         const doughnutData = calcDoughnutData(positives, categories);
         const imports = separateImports(data);
+        const { timestamps, datasets } = process48HourData(past48HrsData);
+        const { co2Timestamps, co2Datasets } = process48HourCO2(past48HrsData);
+
+        console.log(co2Timestamps, co2Datasets);
+
+        console.warn("I'm an idiot");
 
         // Render generation doughnut chart (positives)
         renderDoughnutChart(doughnutData, 'generationDoughnutChart', 'Generation Sources');
@@ -416,15 +505,14 @@ async function initialiseDashboard() {
         updateCO2Info(data);
         displayDemand(data, positives, negatives);
 
-        renderStackedAreaChart(past48HrsData, 'past48Hours');
+        renderStackedAreaChart(timestamps, datasets, 'past48Hours');
+        renderLineChart(co2Timestamps, co2Datasets, 'past48HoursCO2');
 
     } else {
-        const co2Index = document.getElementById('co2-index');
-        co2Index.textContent = 'Failed to load data.';
+        document.getElementById('dashboard').innerHTML = '<h1>Failed to load data.</h1>';
     }
 }
 
 Chart.register(ChartDataLabels);
 
-// Initialise the dashboard
 initialiseDashboard();

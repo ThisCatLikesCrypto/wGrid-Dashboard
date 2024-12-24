@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>wGrid Dashboard</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <script src="script.js"></script>
 </head>
 
@@ -43,10 +43,18 @@
             </div>
         </div>
         <br>
-        <div class="chart-container">
-            <div class="chart-box card takeupfullwidth">
-                <h3 class="centretext">Past 48 hours</h3>
-                <canvas id="past48Hours"></canvas>
+        <div id="past48HoursContainer">
+            <div class="chart-container">
+                <div class="chart-box card takeupfullwidth">
+                    <h3 class="centretext">Past 48 hours (in MW)</h3>
+                    <canvas id="past48Hours"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-box card takeupfullwidth">
+                    <h3 class="centretext">CO<sub>2</sub> for the past 48 hours (in gCO<sub>2</sub>/kWh)</h3>
+                    <canvas id="past48HoursCO2"></canvas>
+                </div>
             </div>
         </div>
     </div>
