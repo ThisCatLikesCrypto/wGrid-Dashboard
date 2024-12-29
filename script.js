@@ -83,6 +83,7 @@ async function fetchPast48Hours() {
 }
 
 function separateNegativeValues(data) {
+    console.log(data);
     const negatives = {};
     const positives = {};
 
@@ -95,7 +96,8 @@ function separateNegativeValues(data) {
     delete data.WIND_EMBEDDED;
 
     for (const key in data) {
-        if (colours[key] && !["CO2", "CO2_INDEX", "CO2_FORECAST"].includes(key)) {
+        if (!["CO2", "CO2_INDEX", "CO2_FORECAST"].includes(key)) {
+            console.log(key);
             if (data[key] < 0) {
                 negatives[key] = data[key];
             } else {
@@ -152,10 +154,8 @@ function separateImports(data) {
     const imports = {};
 
     for (const key in data) {
-        if (colours[key] && !["CO2", "CO2_INDEX", "CO2_FORECAST"].includes(key)) {
-            if (key.includes("INT")) {
-                imports[key] = data[key];
-            }
+        if (key.includes("INT")) {
+            imports[key] = data[key];
         }
     }
     return imports;
@@ -241,7 +241,7 @@ function process48HourCO2(rawData) {
     return { co2Timestamps, co2Datasets };
 }
 
-function renderDoughnutChart(data, elementId, label, isNegative = false) {
+function renderDoughnutChart(data, elementId, label) {
     const labels = Object.keys(data).map(key => friendlyNames[key] || key);
     const values = Object.values(data);
     const backgroundColors = Object.keys(data).map(key => colours[key]);
@@ -481,14 +481,14 @@ async function initialiseDashboard() {
     const data = await fetchGridData();
     const past48HrsData = await fetchPast48Hours();
     if (data) {
-        const { positives, negatives } = separateNegativeValues(data);
+        const { positives, negatives } = separateNegativeValues(data); // TODO: WHY THE FUCK DOES THIS NOT RETURN SOME INT VALUES
 
         console.log(positives);
         console.log(negatives);
 
         const categories = calculateCategories(positives);
         const doughnutData = calcDoughnutData(positives, categories);
-        const imports = separateImports(data);
+        const imports = separateImports(positives);
         const { timestamps, datasets } = process48HourData(past48HrsData);
         const { co2Timestamps, co2Datasets } = process48HourCO2(past48HrsData);
 
