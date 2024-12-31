@@ -53,12 +53,12 @@ const friendlyNames = {
 const co2Names = {
     CO2: 'CO₂ (actual)',
     CO2_FORECAST: 'CO₂ (forecast)'
-}
+};
 
 const co2Colours = {
     CO2: '#008043',
     CO2_FORECAST: '#69D6F8'
-}
+};
 
 async function fetchGridData() {
     try {
@@ -84,8 +84,8 @@ async function fetchPast48Hours() {
 
 function separateNegativeValues(data) {
     console.log(data);
-    const negatives = {};
-    const positives = {};
+    var negatives = {};
+    var positives = {};
 
     // yeah this seems really inaccurate, i mean im keeping it in the api anyway but still
     delete data.SOLAR_EMBEDDED;
@@ -98,13 +98,23 @@ function separateNegativeValues(data) {
     for (const key in data) {
         if (!["CO2", "CO2_INDEX", "CO2_FORECAST"].includes(key)) {
             console.log(key);
+            console.log(data[key]);
             if (data[key] < 0) {
                 negatives[key] = data[key];
+                if (!negatives[key]){
+                    console.error("what the fuck (neg)");
+                }
             } else {
                 positives[key] = data[key];
+                if (!positives[key]){
+                    console.error("what the fuck (pos)");
+                }
             }
         }
     }
+
+    console.log(negatives);
+    console.log(positives);
 
     return { positives, negatives };
 }
@@ -498,7 +508,8 @@ async function initialiseDashboard() {
 
         // Render generation doughnut chart (positives)
         renderDoughnutChart(doughnutData, 'generationDoughnutChart', 'Generation Sources');
-        renderDoughnutChart(imports, 'importsDoughnutChart', 'Imports');
+        // renderDoughnutChart(imports, 'importsDoughnutChart', 'Imports');
+        document.getElementById('importsDoughnutChart').outerHTML = "disabled cuz JS is brokey af and i have no idea why";
 
         console.log(categories);
         renderBarChart(categories);
