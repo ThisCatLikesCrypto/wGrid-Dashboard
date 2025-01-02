@@ -83,7 +83,6 @@ async function fetchPast48Hours() {
 }
 
 function separateNegativeValues(data) {
-    console.log(data);
     var negatives = {};
     var positives = {};
 
@@ -97,24 +96,16 @@ function separateNegativeValues(data) {
 
     for (const key in data) {
         if (!["CO2", "CO2_INDEX", "CO2_FORECAST"].includes(key)) {
-            console.log(key);
-            console.log(data[key]);
             if (data[key] < 0) {
                 negatives[key] = data[key];
-                if (!negatives[key]){
-                    console.error("what the fuck (neg)");
-                }
             } else {
                 positives[key] = data[key];
-                if (!positives[key]){
-                    console.error("what the fuck (pos)");
-                }
             }
         }
     }
 
-    console.log(negatives);
-    console.log(positives);
+    Object.freeze(negatives);
+    Object.freeze(positives);
 
     return { positives, negatives };
 }
@@ -189,11 +180,20 @@ function process48HourData(rawData) {
     const desiredOrder = [
         'NUCLEAR',
         'BIOMASS',
-        'HYDRO',
+        'NPSHYD',
         'WIND',
         'SOLAR',
-        'GAS',
-        'IMPORTS'
+        'CCGT',
+        'OCGT',
+        'INTFR',
+        'INTGRNL',
+        'INTIFA2',
+        'INTIRL',
+        'INTNED',
+        'INTNEM',
+        'INTNSL',
+        'INTVKL',
+        'PS',
     ];
 
     // Sort energy sources based on the predefined order
@@ -462,7 +462,12 @@ function renderLineChart(timestamps, datasets, chartId) {
 function updateCO2Info(data) {
     const co2Index = document.getElementById('co2-index');
     co2Index.classList.add('aqua-text'); // Apply aqua text style
-    co2Index.textContent = `CO2 Intensity: ${data.CO2} gCO2/kWh (${data.CO2_INDEX.toUpperCase()})`;
+    if (data.CO2 == null || data.CO2 == "null" || data.CO2 == "" || data.CO2 == undefined) {
+        co2Index.textContent = `CO2 Intensity: ${data.CO2_FORECAST} gCO2/kWh (forecasted) (${data.CO2_INDEX.toUpperCase()})`;
+    } else {
+        co2Index.textContent = `CO2 Intensity: ${data.CO2} gCO2/kWh (${data.CO2_INDEX.toUpperCase()})`;
+    }
+    
 }
 
 function displayDemand(data, positives, negatives) {
@@ -484,17 +489,16 @@ function displayDemand(data, positives, negatives) {
         negativeTotal += negatives[key];
     }
 
-    document.getElementById('power-equation').innerHTML = `${demand}MW (total) = ${positiveTotal}MW (generation) + ${negativeTotal}MW (demands)`;
+    negativeTotal = negativeTotal.toString().replace("-", "")
+
+    document.getElementById('power-equation').innerHTML = `${demand}MW (total) = ${positiveTotal}MW (generation) - ${negativeTotal}MW (demands)`;
 }
 
 async function initialiseDashboard() {
     const data = await fetchGridData();
     const past48HrsData = await fetchPast48Hours();
     if (data) {
-        const { positives, negatives } = separateNegativeValues(data); // TODO: WHY THE FUCK DOES THIS NOT RETURN SOME INT VALUES
-
-        console.log(positives);
-        console.log(negatives);
+        const { positives, negatives } = separateNegativeValues(data);
 
         const categories = calculateCategories(positives);
         const doughnutData = calcDoughnutData(positives, categories);
@@ -502,16 +506,12 @@ async function initialiseDashboard() {
         const { timestamps, datasets } = process48HourData(past48HrsData);
         const { co2Timestamps, co2Datasets } = process48HourCO2(past48HrsData);
 
-        console.log(co2Timestamps, co2Datasets);
-
         console.warn("I'm an idiot");
 
         // Render generation doughnut chart (positives)
         renderDoughnutChart(doughnutData, 'generationDoughnutChart', 'Generation Sources');
-        // renderDoughnutChart(imports, 'importsDoughnutChart', 'Imports');
-        document.getElementById('importsDoughnutChart').outerHTML = "disabled cuz JS is brokey af and i have no idea why";
+        renderDoughnutChart(imports, 'importsDoughnutChart', 'Imports');
 
-        console.log(categories);
         renderBarChart(categories);
         updateCO2Info(data);
         displayDemand(data, positives, negatives);
