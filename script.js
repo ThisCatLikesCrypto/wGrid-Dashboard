@@ -1,3 +1,5 @@
+const API_URL = "https://repo.c48.uk/api/";
+
 const colours = {
     BIOMASS: '#008043',
     CCGT: '#AAA189',
@@ -60,9 +62,30 @@ const co2Colours = {
     CO2_FORECAST: '#69D6F8'
 };
 
+function openTab(evt, tabName) {
+    // Declare all variables
+    var i, tabcontent, tablinks;
+
+    // Get all elements with class="tabcontent" and hide them
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+
+    // Get all elements with class="tablinks" and remove the class "active"
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+}
+
 async function fetchGridData() {
     try {
-        const response = await fetch('https://repo.c48.uk/api/current');
+        const response = await fetch(`${API_URL}current`);
         if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
         return await response.json();
     } catch (error) {
@@ -73,7 +96,18 @@ async function fetchGridData() {
 
 async function fetchPast48Hours() {
     try {
-        const response = await fetch('https://repo.c48.uk/api/past-48-hrs');
+        const response = await fetch(`${API_URL}past-48-hrs`);
+        if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+}
+
+async function fetchPastWeek() {
+    try {
+        const response = await fetch(`${API_URL}past-week`);
         if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
         return await response.json();
     } catch (error) {
@@ -162,7 +196,7 @@ function separateImports(data) {
     return imports;
 }
 
-function process48HourData(rawData) {
+function processHistoricalData(rawData) {
     const timestamps = rawData.map(entry =>
         new Date(entry.timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
     );
@@ -221,10 +255,12 @@ function process48HourData(rawData) {
         };
     });
 
+    console.log(timestamps, datasets)
+
     return { timestamps, datasets };
 }
 
-function process48HourCO2(rawData) {
+function processHistoricalCO2(rawData) {
     const co2Timestamps = rawData.map(entry =>
         new Date(entry.timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
     );
@@ -467,7 +503,6 @@ function updateCO2Info(data) {
     } else {
         co2Index.textContent = `CO2 Intensity: ${data.CO2} gCO2/kWh (${data.CO2_INDEX.toUpperCase()})`;
     }
-    
 }
 
 function displayDemand(data, positives, negatives) {
@@ -495,16 +530,20 @@ function displayDemand(data, positives, negatives) {
 }
 
 async function initialiseDashboard() {
+    const startTimestamp = new Date();
     const data = await fetchGridData();
     const past48HrsData = await fetchPast48Hours();
+    const pastWeekData = await fetchPastWeek();
     if (data) {
         const { positives, negatives } = separateNegativeValues(data);
 
         const categories = calculateCategories(positives);
         const doughnutData = calcDoughnutData(positives, categories);
         const imports = separateImports(positives);
-        const { timestamps, datasets } = process48HourData(past48HrsData);
-        const { co2Timestamps, co2Datasets } = process48HourCO2(past48HrsData);
+        const { timestamps, datasets } = processHistoricalData(past48HrsData);
+        const { co2Timestamps, co2Datasets } = processHistoricalCO2(past48HrsData);
+        const { weekTimestamps, weekDatasets } = processHistoricalData(pastWeekData);
+        const { weekCO2Timestamps, weekCO2Datasets } = processHistoricalCO2(pastWeekData);
 
         console.warn("I'm an idiot");
 
@@ -519,6 +558,13 @@ async function initialiseDashboard() {
         renderStackedAreaChart(timestamps, datasets, 'past48Hours');
         renderLineChart(co2Timestamps, co2Datasets, 'past48HoursCO2');
 
+        renderStackedAreaChart(weekTimestamps, weekDatasets, 'pastWeek');
+        renderLineChart(weekCO2Timestamps, weekCO2Datasets, 'pastWeekCO2');
+
+        console.log(`%cComplete in ${new Date() - startTimestamp}ms`, 'font-weight: bold; font-size: 30px; color: aqua; text-shadow: 2px 2px 0 rgb(217,31,38)');
+
+
+        document.getElementById('defaultButton').click();
     } else {
         document.getElementById('dashboard').innerHTML = '<h1>Failed to load data.</h1>';
     }

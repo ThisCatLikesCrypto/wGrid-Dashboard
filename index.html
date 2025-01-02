@@ -42,7 +42,11 @@
             </div>
         </div>
         <br>
-        <div id="past48HoursContainer">
+        <div id="timePeriodButtons" class="tab">
+            <button id="defaultButton" class="tablinks" onclick="openTab(event, 'past48HoursContainer')">Past 48 Hours</button>
+            <button class="tablinks" onclick="openTab(event, 'pastWeekContainer')">Past Week</button>
+          </div>
+        <div class="tabcontent" id="past48HoursContainer">
             <div class="chart-container">
                 <div class="chart-box card takeupfullwidth">
                     <h3 class="centretext">Past 48 hours (in MW)</h3>
@@ -53,6 +57,21 @@
                 <div class="chart-box card takeupfullwidth">
                     <h3 class="centretext">CO<sub>2</sub> for the past 48 hours (in gCO<sub>2</sub>/kWh)</h3>
                     <canvas id="past48HoursCO2"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="tabcontent" id="pastWeekContainer">
+            <h1>(fixed soon, cba rn)</h1>
+            <div class="chart-container">
+                <div class="chart-box card takeupfullwidth">
+                    <h3 class="centretext">Past week (in MW)</h3>
+                    <canvas id="pastWeek"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-box card takeupfullwidth">
+                    <h3 class="centretext">CO<sub>2</sub> for the past week (in gCO<sub>2</sub>/kWh)</h3>
+                    <canvas id="pastWeekCO2"></canvas>
                 </div>
             </div>
         </div>
