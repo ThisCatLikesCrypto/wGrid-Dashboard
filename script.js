@@ -248,14 +248,12 @@ function processHistoricalData(rawData) {
         return {
             label: friendlyNames[source] || source,
             data: data,
-            backgroundColor: colours[source] || 'rgba(128, 128, 128, 0.5)', // Default color if not defined
+            backgroundColor: colours[source] || 'rgba(128, 128, 128, 0.5)', // Default colour if not defined
             borderColor: colours[source] || 'rgba(128, 128, 128, 1)',
             fill: true,
             pointRadius: 0,
         };
     });
-
-    console.log(timestamps, datasets)
 
     return { timestamps, datasets };
 }
@@ -540,10 +538,10 @@ async function initialiseDashboard() {
         const categories = calculateCategories(positives);
         const doughnutData = calcDoughnutData(positives, categories);
         const imports = separateImports(positives);
-        const { timestamps, datasets } = processHistoricalData(past48HrsData);
-        const { co2Timestamps, co2Datasets } = processHistoricalCO2(past48HrsData);
-        const { weekTimestamps, weekDatasets } = processHistoricalData(pastWeekData);
-        const { weekCO2Timestamps, weekCO2Datasets } = processHistoricalCO2(pastWeekData);
+        const { timestamps: timestamps, datasets: datasets } = processHistoricalData(past48HrsData);
+        const { co2Timestamps: co2Timestamps, co2Datasets: co2Datasets } = processHistoricalCO2(past48HrsData);
+        const { timestamps: weekTimestamps, datasets: weekDatasets } = processHistoricalData(pastWeekData);
+        const { co2Timestamps: weekCO2Timestamps, co2Datasets: weekCO2Datasets } = processHistoricalCO2(pastWeekData);
 
         console.warn("I'm an idiot");
 
