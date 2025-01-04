@@ -1,4 +1,4 @@
-const API_URL = "https://repo.c48.uk/api/";
+const API_URL = "https://repo.c48.uk/api";
 
 const colours = {
     BIOMASS: '#008043',
@@ -85,33 +85,36 @@ function openTab(evt, tabName) {
 
 async function fetchGridData() {
     try {
-        const response = await fetch(`${API_URL}current`);
+        const response = await fetch(`${API_URL}/current`);
         if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
         return await response.json();
     } catch (error) {
         console.error(error);
+        document.getElementById('loadingIndicator').innerHTML = "Failed to load current data";
         return null;
     }
 }
 
 async function fetchPast48Hours() {
     try {
-        const response = await fetch(`${API_URL}past-48-hrs`);
+        const response = await fetch(`${API_URL}/past-48-hrs`);
         if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
         return await response.json();
     } catch (error) {
         console.error(error);
+        document.getElementById('loadingIndicator').innerHTML = "Failed to load past 48 hrs data";
         return null;
     }
 }
 
 async function fetchPastWeek() {
     try {
-        const response = await fetch(`${API_URL}past-week`);
+        const response = await fetch(`${API_URL}/past-week`);
         if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
         return await response.json();
     } catch (error) {
         console.error(error);
+        document.getElementById('loadingIndicator').innerHTML = "Failed to load past week data";
         return null;
     }
 }
@@ -561,7 +564,7 @@ async function initialiseDashboard() {
 
         console.log(`%cComplete in ${new Date() - startTimestamp}ms`, 'font-weight: bold; font-size: 30px; color: aqua; text-shadow: 2px 2px 0 rgb(217,31,38)');
 
-
+        document.getElementById('loadingIndicator').style.display = 'none';
         document.getElementById('defaultButton').click();
     } else {
         document.getElementById('dashboard').innerHTML = '<h1>Failed to load data.</h1>';

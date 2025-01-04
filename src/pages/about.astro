@@ -1,0 +1,71 @@
+---
+import Layout from "../layouts/Layout.astro"
+---
+
+<Layout title="About">
+    <div class="card walloftext">
+        <h1>Welcome to wGrid Dashboard!</h1>
+        <p>This dashboard is a work in progress. It is not yet complete, but it is being actively developed.</p>
+        <p>
+            My main aim is to combine what I like about <a href="https://grid.iamkate.com">National Grid: Live </a>
+            and <a href="https://energydashboard.co.uk">Energy Dashboard</a> into a single dashboard, while making it 
+            easier for anyone else that also wants to develop a dashboard to use the data.
+        </p>
+    </div>
+    <br>
+    <div class="card walloftext">
+        <h1>How does it work?</h1>
+        <p>The data is sourced from a number of different sources, and then combined into a single database. 
+            This DB then serves a number of different API (Application Programming Interface) endpoints, 
+            including <a href="https://repo.c48.uk/api/current">the current electricity mix</a> and 
+            <a href="https://repo.c48.uk/api/past-48-hrs">historical data for a given time period</a>.
+        </p>
+        <p>The data is then used to generate a number of different charts, through chart.js, and is displayed.</p>
+        <br>
+        <h2>Can I use this API for [project]?</h2>
+        <p>One of the main goals is to make the API stable and reliable enough for use in not just my projects, but 
+            other's too. For the moment, I will not stop you using it (<code>'Access-Control-Allow-Origin'</code> is
+            set to <code>'*'</code> and no custom rate limits are imposed), but <span style="color: crimson">anything 
+            could change at any time</span>. Proper docs will be written once the API is stable. Please also try your best 
+            not to overload the API. At the moment, each load of the dashboard uses about 12ms of CPU time on the server,
+            which means 5000 loads per minute in total. If you need to do more than about 1 request per minute, please either 
+            cache responses (data is updated every 30 minutes) or just use the sources below directly and make your own API.
+        </p>
+        <br>
+        <h2>Can I download the database?</h2>
+        <p>
+            Sure, it's sqlite3 and I just used JSON (there is literally only 2 columns, 1 time 1 data). Download it 
+            <a href="https://repo.c48.uk/api/db">here</a>, I may make a reference parser in the future but it's 
+            super easy to just figure out yourself anyway.
+        </p>
+        <br>
+        <h2>Is this open source?</h2>
+        <p>
+            I may submit this for my A-Level project, so no for now, but it will be in the future. However, it's not like 
+            the dashboard source is minified or anything, so that's at the very least source-available (just open DevTools).
+        </p>
+    </div>
+    <br>
+    <div class="card walloftext">
+        <h1>Sources</h1>
+        <p>The data used in this dashboard is sourced from:</p>
+        <ul>
+            <li><a href="https://bmrs.elexon.co.uk">Elexon Insights Solution</a><br>
+            <code>https://data.elexon.co.uk/bmrs/api/v1/datasets/FUELINST/stream</code></li>
+            <li><a href="https://www.solar.sheffield.ac.uk">Sheffield Solar</a><br>
+            <code>https://api.solar.sheffield.ac.uk/pvlive/api/v4/gsp/0</code></li>
+            <li><a href="https://carbonintensity.org.uk">The Carbon Intensity API</a><br>
+            <code>{"https://api.carbonintensity.org.uk/intensity/{date}T00:00Z/fw24h"}</code></li>
+            <li><a href="https://www.neso.energy">National Energy System Operator</a><br>
+            <code>https://data.nationalgrideso.com/backend/dataset/7a12172a-939c-404c-b581-a6128b74f588/resource/177f6fa4-ae49-4182-81ea-0c6b35f26ca6/download/demanddataupdate.csv</code></li>
+            <li><a href="https://gridwatch.templar.co.uk">GridWatch</a> (very old data)<br>
+            <code>https://gridwatch.templar.co.uk/download.php</code> (not actually an API endpoint)</li>
+        </ul>
+        <br>
+        <p>Copyright notices:</p>
+        <ul>
+            <li>Contains BMRS data © Elexon Limited copyright and database right 2025</li>
+            <li>Supported by NESO Open Data</li>
+        </ul>
+    </div>
+</Layout>

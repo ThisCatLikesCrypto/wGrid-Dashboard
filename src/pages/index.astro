@@ -1,0 +1,75 @@
+---
+import Layout from "../layouts/Layout.astro"
+---
+
+<Layout title="Dashboard">
+    <div class="card centretext">
+        <h1>wGrid Dashboard</h1>
+        <h2>The UK's current electricity mix</h2>
+        <p>Data is updated every 30 minutes.</p>
+    </div>
+    <h1 class="centretext" id="loadingIndicator">Loading...</h1>
+    <noscript>
+        <h1 class="centretext">JavaScript is required to view this page.</h1>
+    </noscript>
+    <div class="upwidgets">
+        <div class="card centretext">
+            <h2>CO<sub>2</sub> Index</h2>
+            <p class="important-values" id="co2-index"></p>
+        </div>
+        <div class="card centretext">
+            <h2>Power</h2>
+            <p class="important-values" id="power-equation"></p>
+        </div>
+    </div>
+    <div class="chart-container">
+        <div class="chart-box card">
+            <h3 class="centretext">Generation Sources</h3>
+            <canvas id="generationDoughnutChart"></canvas>
+        </div>
+        <div class="chart-box card">
+            <h3 class="centretext">Imports</h3>
+            <canvas id="importsDoughnutChart"></canvas>
+        </div>
+        <div class="chart-box card">
+            <h3 class="centretext">Generation Categories</h3>
+            <canvas id="categoryBarChart"></canvas>
+        </div>
+    </div>
+    <br>
+    <div id="timePeriodButtons" class="tab">
+        <button id="defaultButton" class="tablinks" onclick="openTab(event, 'past48HoursContainer')">Past 48
+            Hours</button>
+        <button class="tablinks" onclick="openTab(event, 'pastWeekContainer')">Past Week</button>
+    </div>
+    <div class="tabcontent" id="past48HoursContainer">
+        <div class="chart-container">
+            <div class="chart-box card takeupfullwidth">
+                <h3 class="centretext">Past 48 hours (in MW)</h3>
+                <canvas id="past48Hours"></canvas>
+            </div>
+        </div>
+        <div class="chart-container">
+            <div class="chart-box card takeupfullwidth">
+                <h3 class="centretext">CO<sub>2</sub> for the past 48 hours (in gCO<sub>2</sub>/kWh)</h3>
+                <canvas id="past48HoursCO2"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="tabcontent" id="pastWeekContainer">
+        <div class="chart-container">
+            <div class="chart-box card takeupfullwidth">
+                <h3 class="centretext">Past week (in MW)</h3>
+                <canvas id="pastWeek"></canvas>
+            </div>
+        </div>
+        <div class="chart-container">
+            <div class="chart-box card takeupfullwidth">
+                <h3 class="centretext">CO<sub>2</sub> for the past week (in gCO<sub>2</sub>/kWh)</h3>
+                <canvas id="pastWeekCO2"></canvas>
+            </div>
+        </div>
+    </div>
+    <script is:inline src="/chart.js"></script>
+    <script is:inline src="/script.js"></script>
+</Layout>
