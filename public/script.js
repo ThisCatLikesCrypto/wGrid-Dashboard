@@ -62,7 +62,7 @@ const co2Colours = {
     CO2_FORECAST: '#69D6F8'
 };
 
-function openTab(evt, tabName) {
+function openTab(element, tabName) {
     // Declare all variables
     var i, tabcontent, tablinks;
 
@@ -80,7 +80,7 @@ function openTab(evt, tabName) {
 
     // Show the current tab, and add an "active" class to the button that opened the tab
     document.getElementById(tabName).style.display = "block";
-    evt.currentTarget.className += " active";
+    element.className += " active";
 }
 
 async function fetchGridData() {
@@ -115,6 +115,18 @@ async function fetchPastWeek() {
     } catch (error) {
         console.error(error);
         document.getElementById('loadingIndicator').innerHTML = "Failed to load past week data";
+        return null;
+    }
+}
+
+async function fetchPastYear() {
+    try {
+        const response = await fetch(`${API_URL}/past-year/day-avg`);
+        if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        document.getElementById('loadingIndicator').innerHTML = "Failed to load past year data";
         return null;
     }
 }
@@ -199,10 +211,14 @@ function separateImports(data) {
     return imports;
 }
 
-function processHistoricalData(rawData) {
-    const timestamps = rawData.map(entry =>
-        new Date(entry.timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-    );
+function processHistoricalData(rawData, averagedDays = false) {
+    if (averagedDays) {
+        var timestamps = rawData.map(entry => new Date(entry.timestamp).toISOString().split('T')[0]);
+    } else {
+        var timestamps = rawData.map(entry =>
+            new Date(entry.timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+        );
+    }
 
     var energySources = Object.keys(rawData[0].data).filter(source =>
         source !== 'SOLAR_EMBEDDED' && source !== 'CO2' && source !== 'CO2_INDEX' && source !== 'CO2_FORECAST'
@@ -223,9 +239,11 @@ function processHistoricalData(rawData) {
         'CCGT',
         'OCGT',
         'INTFR',
-        'INTGRNL',
         'INTIFA2',
+        'INTELEC',
+        'INTGRNL',
         'INTIRL',
+        'INTEW',
         'INTNED',
         'INTNEM',
         'INTNSL',
@@ -261,10 +279,14 @@ function processHistoricalData(rawData) {
     return { timestamps, datasets };
 }
 
-function processHistoricalCO2(rawData) {
-    const co2Timestamps = rawData.map(entry =>
-        new Date(entry.timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-    );
+function processHistoricalCO2(rawData, averagedDays = false) {
+    if (averagedDays) {
+        var timestamps = rawData.map(entry => new Date(entry.timestamp).toISOString().split('T')[0]);
+    } else {
+        var timestamps = rawData.map(entry =>
+            new Date(entry.timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+        );
+    }
 
     var energySources = Object.keys(rawData[0].data).filter(source =>
         source == 'CO2' || source == 'CO2_FORECAST'
@@ -532,9 +554,11 @@ function displayDemand(data, positives, negatives) {
 
 async function initialiseDashboard() {
     const startTimestamp = new Date();
+    const loadingIndicator = document.getElementById('loadingIndicator');
     const data = await fetchGridData();
     const past48HrsData = await fetchPast48Hours();
     const pastWeekData = await fetchPastWeek();
+    const pastYearData = await fetchPastYear();
     if (data) {
         const { positives, negatives } = separateNegativeValues(data);
 
@@ -545,6 +569,8 @@ async function initialiseDashboard() {
         const { co2Timestamps: co2Timestamps, co2Datasets: co2Datasets } = processHistoricalCO2(past48HrsData);
         const { timestamps: weekTimestamps, datasets: weekDatasets } = processHistoricalData(pastWeekData);
         const { co2Timestamps: weekCO2Timestamps, co2Datasets: weekCO2Datasets } = processHistoricalCO2(pastWeekData);
+        const { timestamps: yearTimestamps, datasets: yearDatasets } = processHistoricalData(pastYearData, true);
+        const { co2Timestamps: yearCO2Timestamps, co2Datasets: yearCO2Datasets } = processHistoricalCO2(pastYearData);
 
         console.warn("I'm an idiot");
 
@@ -561,6 +587,11 @@ async function initialiseDashboard() {
 
         renderStackedAreaChart(weekTimestamps, weekDatasets, 'pastWeek');
         renderLineChart(weekCO2Timestamps, weekCO2Datasets, 'pastWeekCO2');
+
+        loadingIndicator.innerHTML = 'Rendering past year ...';
+
+        renderStackedAreaChart(yearTimestamps, yearDatasets, 'pastYear');
+        renderLineChart(yearCO2Timestamps, yearCO2Datasets, 'pastYearCO2');
 
         console.log(`%cComplete in ${new Date() - startTimestamp}ms`, 'font-weight: bold; font-size: 30px; color: aqua; text-shadow: 2px 2px 0 rgb(217,31,38)');
 

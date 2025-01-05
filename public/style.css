@@ -144,6 +144,7 @@ canvas {
     display: inline-flex;
     align-content: center;
     font-size: 25px;
+    border-radius: 5px;
 }
 
 .nav a img {
