@@ -570,7 +570,7 @@ async function initialiseDashboard() {
         const { timestamps: weekTimestamps, datasets: weekDatasets } = processHistoricalData(pastWeekData);
         const { co2Timestamps: weekCO2Timestamps, co2Datasets: weekCO2Datasets } = processHistoricalCO2(pastWeekData);
         const { timestamps: yearTimestamps, datasets: yearDatasets } = processHistoricalData(pastYearData, true);
-        const { co2Timestamps: yearCO2Timestamps, co2Datasets: yearCO2Datasets } = processHistoricalCO2(pastYearData);
+        const { co2Timestamps: yearCO2Timestamps, co2Datasets: yearCO2Datasets } = processHistoricalCO2(pastYearData, true);
 
         console.warn("I'm an idiot");
 
