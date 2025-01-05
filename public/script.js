@@ -281,9 +281,9 @@ function processHistoricalData(rawData, averagedDays = false) {
 
 function processHistoricalCO2(rawData, averagedDays = false) {
     if (averagedDays) {
-        var timestamps = rawData.map(entry => new Date(entry.timestamp).toISOString().split('T')[0]);
+        var co2Timestamps = rawData.map(entry => new Date(entry.timestamp).toISOString().split('T')[0]);
     } else {
-        var timestamps = rawData.map(entry =>
+        var co2Timestamps = rawData.map(entry =>
             new Date(entry.timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
         );
     }
