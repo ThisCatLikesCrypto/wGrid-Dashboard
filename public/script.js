@@ -121,7 +121,7 @@ async function fetchPastWeek() {
 
 async function fetchPastYear() {
     try {
-        const response = await fetch(`${API_URL}/past-year/day-avg`);
+        const response = await fetch(`${API_URL}/past-year/week-avg`);
         if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
         return await response.json();
     } catch (error) {
