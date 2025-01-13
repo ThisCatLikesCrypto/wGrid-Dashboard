@@ -1,6 +1,8 @@
 const API_URL = "https://gcore.c48.uk/api"; // testing, will cache for 1 min, 
 // make a api.grid.me.uk in future, keep cached with gcore
 // backend is repo.c48.uk
+// move grid.me.uk to ovhcloud domains when domain reaches 60 days old (2025-02-19)
+// also probably move the whole thing to the reposerver
 
 const colours = {
     BIOMASS: '#008043',
@@ -64,75 +66,51 @@ const co2Colours = {
     CO2_FORECAST: '#69D6F8'
 };
 
+/**
+ *  Open the tab with the given name and add an "active" class 
+ *  to the button that opened the tab, and hide all other tabs (elements with class `tabcontent`).
+ *  @param element the button that is clicked (use `this` in the HTML)
+ *  @param {string}tabName the tab to be opened's id
+*/
 function openTab(element, tabName) {
-    // Declare all variables
     var i, tabcontent, tablinks;
 
-    // Get all elements with class="tabcontent" and hide them
     tabcontent = document.getElementsByClassName("tabcontent");
     for (i = 0; i < tabcontent.length; i++) {
         tabcontent[i].style.display = "none";
     }
 
-    // Get all elements with class="tablinks" and remove the class "active"
     tablinks = document.getElementsByClassName("tablinks");
     for (i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace(" active", "");
     }
 
-    // Show the current tab, and add an "active" class to the button that opened the tab
     document.getElementById(tabName).style.display = "block";
     element.className += " active";
 }
 
-async function fetchGridData() {
+/**
+ *  Fetch data from the endpoint and return it as a JSON object.
+ *  @param {string} endpoint - The endpoint to fetch data from.
+ *  @returns {Promise<object>} - A promise that resolves to the JSON object.
+*/
+async function fetchData(endpoint) {
     try {
-        const response = await fetch(`${API_URL}/current`);
+        const response = await fetch(`${API_URL}/${endpoint}`);
         if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
         return await response.json();
     } catch (error) {
         console.error(error);
-        document.getElementById('loadingIndicator').innerHTML = "Failed to load current data";
+        document.getElementById('loadingIndicator').innerHTML = `Failed to load /${url}`;
         return null;
     }
 }
 
-async function fetchPast48Hours() {
-    try {
-        const response = await fetch(`${API_URL}/past-48-hrs`);
-        if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
-        return await response.json();
-    } catch (error) {
-        console.error(error);
-        document.getElementById('loadingIndicator').innerHTML = "Failed to load past 48 hrs data";
-        return null;
-    }
-}
-
-async function fetchPastWeek() {
-    try {
-        const response = await fetch(`${API_URL}/past-week`);
-        if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
-        return await response.json();
-    } catch (error) {
-        console.error(error);
-        document.getElementById('loadingIndicator').innerHTML = "Failed to load past week data";
-        return null;
-    }
-}
-
-async function fetchPastYear() {
-    try {
-        const response = await fetch(`${API_URL}/past-year/week-avg`);
-        if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
-        return await response.json();
-    } catch (error) {
-        console.error(error);
-        document.getElementById('loadingIndicator').innerHTML = "Failed to load past year data";
-        return null;
-    }
-}
-
+/**
+ *  Separate the positive and negative values from the data object
+ *  @param {object} data 
+ *  @returns {object} {positives, negatives}
+ */
 function separateNegativeValues(data) {
     var negatives = {};
     var positives = {};
@@ -161,15 +139,24 @@ function separateNegativeValues(data) {
     return { positives, negatives };
 }
 
-// Function to calculate luminance and return black or white
+/**
+ *  Function to calculate luminance and return black or white
+ *  @param hexColor 
+ *  @returns {string} black or white
+ */
 function getContrastColor(hexColor) {
     const rgb = hexColor.replace('#', '').match(/.{2}/g).map(x => parseInt(x, 16));
     const luminance = (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]) / 255;
     return luminance > 0.5 ? '#000' : '#fff'; // Black for light colors, white for dark colors
 }
 
+/**
+ *  Remove all the INT* keys and add IMPORTS (an aggregate of them all)
+ *  @param {object} positives 
+ *  @param {object} categories 
+ *  @returns {object} data for the doughnut chart
+ */
 function calcDoughnutData(positives, categories) {
-    // remove all the INT stuff and add IMPORTS
     delete positives.INTFR;
     delete positives.INTGRNL;
     delete positives.INTIFA2;
@@ -183,6 +170,11 @@ function calcDoughnutData(positives, categories) {
     return positives;
 }
 
+/**
+ *  Calculate generation categories
+ *  @param {object} data
+ *  @returns {object} {renewables, lowCarbon, fossilFuels, imports}
+ */
 function calculateCategories(data) {
     const renewables = data.WIND + data.SOLAR + data.WIND_EMBEDDED || data.WIND + data.SOLAR;
     const lowCarbon = data.BIOMASS + data.NUCLEAR;
@@ -557,10 +549,10 @@ function displayDemand(data, positives, negatives) {
 async function initialiseDashboard() {
     const startTimestamp = new Date();
     const loadingIndicator = document.getElementById('loadingIndicator');
-    const data = await fetchGridData();
-    const past48HrsData = await fetchPast48Hours();
-    const pastWeekData = await fetchPastWeek();
-    const pastYearData = await fetchPastYear();
+    const data = await fetchData('current');
+    const past48HrsData = await fetchData('past-48-hrs');
+    const pastWeekData = await fetchData('past-week');
+    const pastYearData = await fetchData('past-year/week-avg');
     if (data) {
         const { positives, negatives } = separateNegativeValues(data);
 
