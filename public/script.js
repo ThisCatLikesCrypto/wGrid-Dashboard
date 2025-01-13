@@ -1,4 +1,6 @@
-const API_URL = "https://repo.c48.uk/api";
+const API_URL = "https://gcore.c48.uk/api"; // testing, will cache for 1 min, 
+// make a api.grid.me.uk in future, keep cached with gcore
+// backend is repo.c48.uk
 
 const colours = {
     BIOMASS: '#008043',

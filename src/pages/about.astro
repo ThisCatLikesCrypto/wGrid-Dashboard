@@ -17,8 +17,8 @@ import Layout from "../layouts/Layout.astro"
         <h1>How does it work?</h1>
         <p>The data is sourced from a number of different sources, and then combined into a single database. 
             This DB then serves a number of different API (Application Programming Interface) endpoints, 
-            including <a href="https://repo.c48.uk/api/current">the current electricity mix</a> and 
-            <a href="https://repo.c48.uk/api/past-48-hrs">historical data for a given time period</a>.
+            including <a href="https://gcore.c48.uk/api/current">the current electricity mix</a> and 
+            <a href="https://gcore.c48.uk/api/past-48-hrs">historical data for a given time period</a>.
         </p>
         <p>The data is then used to generate a number of different charts, through chart.js, and is displayed.</p>
         <br>
@@ -27,9 +27,9 @@ import Layout from "../layouts/Layout.astro"
             other's too. For the moment, I will not stop you using it (<code>'Access-Control-Allow-Origin'</code> is
             set to <code>'*'</code> and no custom rate limits are imposed), but <span style="color: crimson">anything 
             could change at any time</span>. Proper docs will be written once the API is stable. Please also try your best 
-            not to overload the API. At the moment, each load of the dashboard uses about 12ms of CPU time on the server,
-            which means 5000 loads per minute in total. If you need to do more than about 1 request per minute, please either 
-            cache responses (data is updated every 30 minutes) or just use the sources below directly and make your own API.
+            not to overload the API. At the moment, each fetch of the API endpoints uses about 300ms of CPU time on the server,
+            however this is now cached through gcore (with a TTL of 1 minute), so responses should be pretty quick and it is 
+            very unlikely that the server will be overloaded.
         </p>
         <br>
         <h2>Can I download the database?</h2>
