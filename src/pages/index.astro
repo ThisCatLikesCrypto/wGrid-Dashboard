@@ -11,7 +11,7 @@ import Layout from "../layouts/Layout.astro"
     </div>
     <h1 class="centretext" id="loadingIndicator">Loading...</h1>
     <noscript>
-        <h1 class="centretext">JavaScript is required to view this page.</h1>
+        <h1 class="centretext" style="color: crimson">JavaScript is required to view this page.</h1>
     </noscript>
     <div class="upwidgets">
         <div class="card centretext">
@@ -87,4 +87,7 @@ import Layout from "../layouts/Layout.astro"
     </div>
     <script is:inline src="/chart.js"></script>
     <script is:inline src="/script.js"></script>
+    <script is:inline>
+        initialiseDashboard();
+    </script>
 </Layout>

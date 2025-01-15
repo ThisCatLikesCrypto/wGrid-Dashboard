@@ -1,0 +1,26 @@
+---
+import Layout from "../layouts/Layout.astro"
+---
+
+<Layout title="Historical" description="Historical data for the UK's electricity grid">
+    <div class="card centretext">
+        <h1>Historical Data</h1>
+        <p>Data since May 2011.</p>
+        <p>If it takes a while to load, that is normal! The server takes like 5 seconds to process all of it.</p>
+    </div>
+    <h1 class="centretext" id="loadingIndicator">Loading...</h1>
+    <noscript>
+        <h1 class="centretext" style="color: crimson">JavaScript is required to view this page.</h1>
+    </noscript>
+    <div class="chart-container">
+        <div class="chart-box card takeupfullwidth">
+            <h3 class="centretext">All historical data (in MW)</h3>
+            <canvas id="pastForever"></canvas>
+        </div>
+    </div>
+    <script is:inline src="/chart.js"></script>
+    <script is:inline src="/script.js"></script>
+    <script is:inline>
+        initialiseHistorical();
+    </script>
+</Layout>

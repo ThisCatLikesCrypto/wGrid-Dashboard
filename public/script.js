@@ -70,7 +70,7 @@ const co2Colours = {
  *  Open the tab with the given name and add an "active" class 
  *  to the button that opened the tab, and hide all other tabs (elements with class `tabcontent`).
  *  @param element the button that is clicked (use `this` in the HTML)
- *  @param {string}tabName the tab to be opened's id
+ *  @param {string} tabName the tab to be opened's id
 */
 function openTab(element, tabName) {
     var i, tabcontent, tablinks;
@@ -194,6 +194,11 @@ function calculateCategories(data) {
     return { renewables, lowCarbon, fossilFuels, imports };
 }
 
+/**
+ *  Separate the import data from the data object
+ *  @param {object} data 
+ *  @returns {object} imports
+ */
 function separateImports(data) {
     const imports = {};
 
@@ -205,6 +210,12 @@ function separateImports(data) {
     return imports;
 }
 
+/**
+ *  Process the historical generation data and return the timestamps and datasets ready for use in chart.js
+ *  @param {object} rawData 
+ *  @param {boolean} averagedDays 
+ *  @returns {object} {timestamps, datasets}
+ */
 function processHistoricalData(rawData, averagedDays = false) {
     if (averagedDays) {
         var timestamps = rawData.map(entry => new Date(entry.timestamp).toISOString().split('T')[0]);
@@ -273,6 +284,12 @@ function processHistoricalData(rawData, averagedDays = false) {
     return { timestamps, datasets };
 }
 
+/**
+ *  Process the historical CO2 data and return the timestamps and datasets ready for use in chart.js
+ *  @param {object} rawData 
+ *  @param {boolean} averagedDays 
+ *  @returns {object} {co2Timestamps, co2Datasets}
+ */
 function processHistoricalCO2(rawData, averagedDays = false) {
     if (averagedDays) {
         var co2Timestamps = rawData.map(entry => new Date(entry.timestamp).toISOString().split('T')[0]);
@@ -304,6 +321,12 @@ function processHistoricalCO2(rawData, averagedDays = false) {
     return { co2Timestamps, co2Datasets };
 }
 
+/**
+ *  Render a doughnut chart using chart.js
+ *  @param {object} data 
+ *  @param {string} elementId 
+ *  @param {string} label 
+ */
 function renderDoughnutChart(data, elementId, label) {
     const labels = Object.keys(data).map(key => friendlyNames[key] || key);
     const values = Object.values(data);
@@ -358,6 +381,10 @@ function renderDoughnutChart(data, elementId, label) {
     });
 }
 
+/**
+ *  Render a bar chart using chart.js
+ *  @param {object} categories  
+ */
 function renderBarChart(categories) {
     const ctx = document.getElementById('categoryBarChart').getContext('2d');
     new Chart(ctx, {
@@ -423,6 +450,12 @@ function renderBarChart(categories) {
     });
 }
 
+/**
+ *  Render a stacked area chart using chart.js
+ *  @param {array} timestamps 
+ *  @param {array} datasets 
+ *  @param {string} chartId 
+ */
 function renderStackedAreaChart(timestamps, datasets, chartId) {
     const ctx = document.getElementById(chartId).getContext('2d');
     const config = {
@@ -468,6 +501,12 @@ function renderStackedAreaChart(timestamps, datasets, chartId) {
     return new Chart(ctx, config);
 }
 
+/**
+ *  Render a line chart using chart.js
+ *  @param {array} timestamps 
+ *  @param {array} datasets 
+ *  @param {string} chartId 
+ */
 function renderLineChart(timestamps, datasets, chartId) {
     const ctx = document.getElementById(chartId).getContext('2d');
     const config = {
@@ -512,6 +551,10 @@ function renderLineChart(timestamps, datasets, chartId) {
     return new Chart(ctx, config);
 }
 
+/**
+ *  Update the CO2 intensity information in the dashboard
+ *  @param {object} data 
+ */
 function updateCO2Info(data) {
     const co2Index = document.getElementById('co2-index');
     co2Index.classList.add('aqua-text'); // Apply aqua text style
@@ -522,6 +565,12 @@ function updateCO2Info(data) {
     }
 }
 
+/**
+ *  Display the demand information in the dashboard
+ *  @param {object} data 
+ *  @param {object} positives 
+ *  @param {object} negatives 
+ */
 function displayDemand(data, positives, negatives) {
     let demand = 0;
     let positiveTotal = 0;
@@ -546,16 +595,18 @@ function displayDemand(data, positives, negatives) {
     document.getElementById('power-equation').innerHTML = `${demand}MW (total) = ${positiveTotal}MW (generation) - ${negativeTotal}MW (demands)`;
 }
 
+/**
+ *  Initialise the dashboard
+ */
 async function initialiseDashboard() {
     const startTimestamp = new Date();
-    const loadingIndicator = document.getElementById('loadingIndicator');
     const data = await fetchData('current');
     const past48HrsData = await fetchData('past-48-hrs');
     const pastWeekData = await fetchData('past-week');
     const pastYearData = await fetchData('past-year/week-avg');
     if (data) {
+        // Process all the data
         const { positives, negatives } = separateNegativeValues(data);
-
         const categories = calculateCategories(positives);
         const doughnutData = calcDoughnutData(positives, categories);
         const imports = separateImports(positives);
@@ -568,10 +619,9 @@ async function initialiseDashboard() {
 
         console.warn("I'm an idiot");
 
-        // Render generation doughnut chart (positives)
+        // Render current data charts
         renderDoughnutChart(doughnutData, 'generationDoughnutChart', 'Generation Sources');
         renderDoughnutChart(imports, 'importsDoughnutChart', 'Imports');
-
         renderBarChart(categories);
         updateCO2Info(data);
         displayDemand(data, positives, negatives);
@@ -581,8 +631,6 @@ async function initialiseDashboard() {
 
         renderStackedAreaChart(weekTimestamps, weekDatasets, 'pastWeek');
         renderLineChart(weekCO2Timestamps, weekCO2Datasets, 'pastWeekCO2');
-
-        loadingIndicator.innerHTML = 'Rendering past year ...';
 
         renderStackedAreaChart(yearTimestamps, yearDatasets, 'pastYear');
         renderLineChart(yearCO2Timestamps, yearCO2Datasets, 'pastYearCO2');
@@ -596,6 +644,22 @@ async function initialiseDashboard() {
     }
 }
 
+async function initialiseHistorical() {
+    const startTimestamp = new Date();
+    const data = await fetchData('all/month-avg');
+    if (data) {
+        const { timestamps, datasets } = processHistoricalData(data, true);
+        renderStackedAreaChart(timestamps, datasets, 'pastForever');
+
+        console.log(`%cComplete in ${new Date() - startTimestamp}ms`, 'font-weight: bold; font-size: 30px; color: aqua; text-shadow: 2px 2px 0 rgb(217,31,38)');
+
+        document.getElementById('loadingIndicator').style.display = 'none';
+        document.getElementById('defaultButton').click();
+    } else {
+        document.getElementById('dashboard').innerHTML = '<h1>Failed to load data.</h1>';
+    }
+}
+
 Chart.register(ChartDataLabels);
 
-initialiseDashboard();
+// initialiseDashboard() is called from the html
