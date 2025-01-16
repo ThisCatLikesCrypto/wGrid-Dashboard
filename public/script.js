@@ -214,9 +214,10 @@ function separateImports(data) {
  *  Process the historical generation data and return the timestamps and datasets ready for use in chart.js
  *  @param {object} rawData 
  *  @param {boolean} averagedDays 
+ *  @param {boolean} includeEmbedded
  *  @returns {object} {timestamps, datasets}
  */
-function processHistoricalData(rawData, averagedDays = false) {
+function processHistoricalData(rawData, averagedDays = false, includeEmbedded = true) {
     if (averagedDays) {
         var timestamps = rawData.map(entry => new Date(entry.timestamp).toISOString().split('T')[0]);
     } else {
@@ -229,11 +230,10 @@ function processHistoricalData(rawData, averagedDays = false) {
         source !== 'SOLAR_EMBEDDED' && source !== 'CO2' && source !== 'CO2_INDEX' && source !== 'CO2_FORECAST'
     );
 
-    // Combine WIND and WIND_EMBEDDED into one dataset
-    if (energySources.includes('WIND') && energySources.includes('WIND_EMBEDDED')) {
-        // Remove WIND_EMBEDDED from the sources array, as it will be combined with WIND
-        energySources = energySources.filter(source => source !== 'WIND_EMBEDDED');
-    }
+        if (energySources.includes('WIND') && energySources.includes('WIND_EMBEDDED')) {
+            // Remove WIND_EMBEDDED from the sources array, as it will be combined with WIND
+            energySources = energySources.filter(source => source !== 'WIND_EMBEDDED');
+        }
 
     const desiredOrder = [
         'NUCLEAR',
@@ -263,13 +263,19 @@ function processHistoricalData(rawData, averagedDays = false) {
 
     const datasets = energySources.map(source => {
         // Combine WIND and WIND_EMBEDDED if both are present
-        let data = rawData.map(entry => {
-            if (source === 'WIND') {
-                // Combine WIND and WIND_EMBEDDED data
-                return (entry.data['WIND'] || 0) + (entry.data['WIND_EMBEDDED'] || 0);
-            }
-            return entry.data[source] || 0;
-        });
+        if (includeEmbedded) {
+            var data = rawData.map(entry => {
+                if (source === 'WIND') {
+                    // Combine WIND and WIND_EMBEDDED data
+                    return (entry.data['WIND'] || 0) + (entry.data['WIND_EMBEDDED'] || 0);
+                }
+                return entry.data[source] || 0;
+            });
+        } else {
+            var data = rawData.map(entry => {
+                return entry.data[source] || 0;
+            });
+        }
 
         return {
             label: friendlyNames[source] || source,
@@ -648,7 +654,7 @@ async function initialiseHistorical() {
     const startTimestamp = new Date();
     const data = await fetchData('all/month-avg');
     if (data) {
-        const { timestamps, datasets } = processHistoricalData(data, true);
+        const { timestamps, datasets } = processHistoricalData(data, true, false);
         renderStackedAreaChart(timestamps, datasets, 'pastForever');
 
         console.log(`%cComplete in ${new Date() - startTimestamp}ms`, 'font-weight: bold; font-size: 30px; color: aqua; text-shadow: 2px 2px 0 rgb(217,31,38)');
