@@ -243,6 +243,7 @@ function processHistoricalData(rawData, averagedDays = false, includeEmbedded = 
         'SOLAR',
         'CCGT',
         'OCGT',
+	'COAL',
         'INTFR',
         'INTIFA2',
         'INTELEC',
@@ -668,4 +669,4 @@ async function initialiseHistorical() {
 
 Chart.register(ChartDataLabels);
 
-// initialiseDashboard() is called from the html
+// initialiseDashboard() or initialiseHistorical() is called from the html
