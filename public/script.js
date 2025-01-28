@@ -566,7 +566,7 @@ function updateCO2Info(data) {
     const co2Index = document.getElementById('co2-index');
     co2Index.classList.add('aqua-text'); // Apply aqua text style
     if (data.CO2 == null || data.CO2 == "null" || data.CO2 == "" || data.CO2 == undefined) {
-        co2Index.textContent = `CO2 Intensity: ${data.CO2_FORECAST} gCO2/kWh (forecasted) (${data.CO2_INDEX.toUpperCase()})`;
+        co2Index.textContent = `CO2 Intensity: ${data.CO2_FORECAST} gCO2/kWh (forecasted)`;
     } else {
         co2Index.textContent = `CO2 Intensity: ${data.CO2} gCO2/kWh (${data.CO2_INDEX.toUpperCase()})`;
     }
@@ -651,6 +651,9 @@ async function initialiseDashboard() {
     }
 }
 
+/**
+ * Initialise historical data (/historical/)
+ */
 async function initialiseHistorical() {
     const startTimestamp = new Date();
     const data = await fetchData('all/month-avg');
