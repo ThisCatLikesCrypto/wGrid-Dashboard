@@ -1,8 +1,6 @@
 const API_URL = "https://gcore.c48.uk/api"; // testing, will cache for 1 min, 
 // make a api.grid.me.uk in future, keep cached with gcore
-// backend is repo.c48.uk
-// move grid.me.uk to ovhcloud domains when domain reaches 60 days old (2025-02-19)
-// also probably move the whole thing to the reposerver
+// backend is sathonyia.srv.c48.uk, maybe try to improve perf and move to melina.srv.c48.uk??
 
 const colours = {
     BIOMASS: '#008043',
@@ -104,6 +102,20 @@ async function fetchData(endpoint) {
         document.getElementById('loadingIndicator').innerHTML = `Failed to load /${url}`;
         return null;
     }
+}
+
+/**
+ * Cleans the data object by replacing undefined values with null so JS doesn't start NaN-ing everything
+ * @param {object} data
+ * @returns {object} cleaned data
+ */
+function cleanData(data) {
+    for (const key in data) {
+        if (data[key] == undefined) {
+            data[key] = null;
+        }
+    }
+    return data;
 }
 
 /**
@@ -607,7 +619,7 @@ function displayDemand(data, positives, negatives) {
  */
 async function initialiseDashboard() {
     const startTimestamp = new Date();
-    const data = await fetchData('current');
+    const data = cleanData(await fetchData('current')); // only current data needs to be cleaned as this only exists to account for when upstream APIs are behind
     const past48HrsData = await fetchData('past-48-hrs');
     const pastWeekData = await fetchData('past-week');
     const pastYearData = await fetchData('past-year/week-avg');
