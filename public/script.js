@@ -105,7 +105,8 @@ async function fetchData(endpoint) {
 }
 
 /**
- * Cleans the data object by replacing undefined values with null so JS doesn't start NaN-ing everything
+ * Cleans the data object by replacing undefined values with null and 
+ * adding missing keys so JS doesn't start NaN-ing everything
  * @param {object} data
  * @returns {object} cleaned data
  */
@@ -115,7 +116,35 @@ function cleanData(data) {
             data[key] = null;
         }
     }
-    return data;
+    return {
+        "BIOMASS": data["BIOMASS"] || null,
+        "CCGT": data["CCGT"] || null,
+        "COAL": data["COAL"] || null,
+        "INTELEC": data["INTELEC"] || null,
+        "INTEW":  data["INTEW"] || null,
+        "INTFR": data["INTFR"] || null,
+        "INTGRNL": data["INTGRNL"] || null,
+        "INTIFA2": data["INTIFA2"] || null,
+        "INTIRL": data["INTIRL"] || null,
+        "INTNED": data["INTNED"] || null,
+        "INTNEM": data["INTNEM"] || null,
+        "INTNSL": data["INTNSL"] || null,
+        "INTVKL": data["INTVKL"] || null,
+        "NPSHYD": data["NPSHYD"] || null,
+        "NUCLEAR": data["NUCLEAR"] || null,
+        "OCGT": data["OCGT"] || null,
+        "OIL": data["OIL"] || null,
+        "OTHER": data["OTHER"] || null,
+        "PS": data["PS"] || null,
+        "WIND": data["WIND"] || null,
+        "SOLAR": data["SOLAR"] || null,
+        "CO2": data["CO2"] || null,
+        "CO2_INDEX": data["CO2_INDEX"] || null,
+        "CO2_FORECAST": data["CO2_FORECAST"] || null, // figure out something to put here, probably make api endpoint for forecase
+        "WIND_EMBEDDED": data["WIND_EMBEDDED"] || null,
+        "SOLAR_EMBEDDED": data["SOLAR_EMBEDDED"] || null
+    }
+
 }
 
 /**
