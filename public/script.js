@@ -1,6 +1,4 @@
-const API_URL = "https://gcore.c48.uk/api"; // testing, will cache for 1 min, 
-// make a api.grid.me.uk in future, keep cached with gcore
-// backend is sathonyia.srv.c48.uk, maybe try to improve perf and move to melina.srv.c48.uk??
+const API_URL = "https://api.grid.me.uk/api";
 
 const colours = {
     BIOMASS: '#008043',

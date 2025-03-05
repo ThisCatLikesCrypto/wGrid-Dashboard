@@ -17,8 +17,8 @@ import Layout from "../layouts/Layout.astro"
         <h1>How does it work?</h1>
         <p>The data is sourced from a number of different sources, and then combined into a single database. 
             This DB then serves a number of different API (Application Programming Interface) endpoints, 
-            including <a href="https://gcore.c48.uk/api/current">the current electricity mix</a> and 
-            <a href="https://gcore.c48.uk/api/past-48-hrs">historical data for a given time period</a>.
+            including <a href="https://api.grid.me.uk/api/current">the current electricity mix</a> and 
+            <a href="https://api.grid.me.uk/api/past-48-hrs">historical data for a given time period</a>.
         </p>
         <p>The data is then used to generate a number of different charts, through chart.js, and is displayed.</p>
         <br>
@@ -26,16 +26,13 @@ import Layout from "../layouts/Layout.astro"
         <p>One of the main goals is to make the API stable and reliable enough for use in not just my projects, but 
             other's too. For the moment, I will not stop you using it (<code>'Access-Control-Allow-Origin'</code> is
             set to <code>'*'</code> and no custom rate limits are imposed), but <span style="color: crimson">anything 
-            could change at any time</span>. Proper docs will be written once the API is stable. Please also try your best 
-            not to overload the API. At the moment, each fetch of the API endpoints uses about 300ms of CPU time on the server,
-            however this is now cached through gcore (with a TTL of 1 minute), so responses should be pretty quick and it is 
-            very unlikely that the server will be overloaded.
+            could change at any time</span>. Proper docs will be written once the API is stable.
         </p>
         <br>
         <h2>Can I download the database?</h2>
         <p>
             Sure, it's sqlite3 and I just used JSON (there is literally only 2 columns, 1 time 1 data). Download it 
-            <a href="https://repo.c48.uk/api/db">here</a>, I may make a reference parser in the future but it's 
+            <a href="https://api.grid.me.uk/api/db">here</a>, I may make a reference parser in the future but it's 
             super easy to just figure out yourself anyway.
         </p>
         <br>
