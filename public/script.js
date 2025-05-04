@@ -1,65 +1,65 @@
 const API_URL = "https://api.grid.me.uk/api";
 
 const colours = {
-    BIOMASS: '#008043',
-    CCGT: '#AAA189',
-    COAL: '#6C4B41',
-    INTELEC: 'rgba(169,122,176,1)',
-    INTEW: 'rgba(169,122,176,1)',
-    INTFR: 'rgba(169,122,176,1)',
-    INTGRNL: 'rgba(169,122,176,1)',
-    INTIFA2: 'rgba(169,122,176,1)',
-    INTIRL: 'rgba(169,122,176,1)',
-    INTNED: 'rgba(169,122,176,1)',
-    INTNEM: 'rgba(169,122,176,1)',
-    INTNSL: 'rgba(169,122,176,1)',
-    INTVKL: 'rgba(169,122,176,1)',
-    IMPORTS: 'rgba(169,122,176,1)',
-    NPSHYD: '#1878EA',
-    NUCLEAR: '#9D71F7',
-    OCGT: '#AAA189',
-    OIL: '#584745',
-    OTHER: '#808080',
-    PS: '#2B3CD8',
-    WIND: '#69D6F8',
-    WIND_EMBEDDED: '#69D6F8',
-    SOLAR: '#FFC700'
+    biomass: '#008043',
+    ccgt: '#AAA189',
+    coal: '#6C4B41',
+    intelec: 'rgba(169,122,176,1)',
+    intew: 'rgba(169,122,176,1)',
+    intfr: 'rgba(169,122,176,1)',
+    intgrnl: 'rgba(169,122,176,1)',
+    intifa2: 'rgba(169,122,176,1)',
+    intirl: 'rgba(169,122,176,1)',
+    intned: 'rgba(169,122,176,1)',
+    intnem: 'rgba(169,122,176,1)',
+    intnsl: 'rgba(169,122,176,1)',
+    intvkl: 'rgba(169,122,176,1)',
+    imports: 'rgba(169,122,176,1)',
+    npshyd: '#1878EA',
+    nuclear: '#9D71F7',
+    ocgt: '#AAA189',
+    oil: '#584745',
+    other: '#808080',
+    ps: '#2B3CD8',
+    wind: '#69D6F8',
+    wind_embedded: '#69D6F8',
+    solar: '#FFC700'
 };
 
 const friendlyNames = {
-    BIOMASS: 'Biomass',
-    CCGT: 'Gas',
-    COAL: 'Coal',
-    INTELEC: 'France (Eleclink)',
-    INTEW: 'Ireland (East-West)',
-    INTFR: 'France (IFA)',
-    INTGRNL: 'Ireland (Greenlink)',
-    INTIFA2: 'France (IFA2)',
-    INTIRL: 'NI (Moyle)',
-    INTNED: 'Netherlands (BritNed)',
-    INTNEM: 'Belgium (Nemo Link)',
-    INTNSL: 'Norway (North Sea Link)',
-    INTVKL: 'Denmark (Viking Link)',
-    IMPORTS: 'Imports',
-    NPSHYD: 'Hydro',
-    NUCLEAR: 'Nuclear',
-    OCGT: 'Open Cycle Gas',
-    OIL: 'Oil',
-    OTHER: 'Other',
-    PS: 'Pumped Storage',
-    WIND: 'Wind',
-    WIND_EMBEDDED: 'Wind (Embedded, estimated)',
-    SOLAR: 'Solar'
+    biomass: 'biomass',
+    ccgt: 'Gas',
+    coal: 'coal',
+    intelec: 'France (Eleclink)',
+    intew: 'Ireland (East-West)',
+    intfr: 'France (IFA)',
+    intgrnl: 'Ireland (Greenlink)',
+    intifa2: 'France (IFA2)',
+    intirl: 'NI (Moyle)',
+    intned: 'Netherlands (BritNed)',
+    intnem: 'Belgium (Nemo Link)',
+    intnsl: 'Norway (North Sea Link)',
+    intvkl: 'Denmark (Viking Link)',
+    imports: 'Imports',
+    npshyd: 'Hydro',
+    nuclear: 'nuclear',
+    ocgt: 'Open Cycle Gas',
+    oil: 'oil',
+    other: 'other',
+    ps: 'Pumped Storage',
+    wind: 'wind',
+    wind_embedded: 'wind (Embedded, estimated)',
+    solar: 'solar'
 };
 
 const co2Names = {
-    CO2: 'CO₂ (actual)',
-    CO2_FORECAST: 'CO₂ (forecast)'
+    co2: 'CO₂ (actual)',
+    co2_forecast: 'CO₂ (forecast)'
 };
 
 const co2Colours = {
-    CO2: '#008043',
-    CO2_FORECAST: '#69D6F8'
+    co2: '#008043',
+    co2_forecast: '#69D6F8'
 };
 
 /**
@@ -115,32 +115,31 @@ function cleanData(data) {
         }
     }
     return {
-        "BIOMASS": data["BIOMASS"] || null,
-        "CCGT": data["CCGT"] || null,
-        "COAL": data["COAL"] || null,
-        "INTELEC": data["INTELEC"] || null,
-        "INTEW":  data["INTEW"] || null,
-        "INTFR": data["INTFR"] || null,
-        "INTGRNL": data["INTGRNL"] || null,
-        "INTIFA2": data["INTIFA2"] || null,
-        "INTIRL": data["INTIRL"] || null,
-        "INTNED": data["INTNED"] || null,
-        "INTNEM": data["INTNEM"] || null,
-        "INTNSL": data["INTNSL"] || null,
-        "INTVKL": data["INTVKL"] || null,
-        "NPSHYD": data["NPSHYD"] || null,
-        "NUCLEAR": data["NUCLEAR"] || null,
-        "OCGT": data["OCGT"] || null,
-        "OIL": data["OIL"] || null,
-        "OTHER": data["OTHER"] || null,
-        "PS": data["PS"] || null,
-        "WIND": data["WIND"] || null,
-        "SOLAR": data["SOLAR"] || null,
-        "CO2": data["CO2"] || null,
-        "CO2_INDEX": data["CO2_INDEX"] || null,
-        "CO2_FORECAST": data["CO2_FORECAST"] || null, // figure out something to put here, probably make api endpoint for forecase
-        "WIND_EMBEDDED": data["WIND_EMBEDDED"] || null,
-        "SOLAR_EMBEDDED": data["SOLAR_EMBEDDED"] || null
+        "biomass": data["biomass"] || null,
+        "ccgt": data["ccgt"] || null,
+        "coal": data["coal"] || null,
+        "intelec": data["intelec"] || null,
+        "intew": data["intew"] || null,
+        "intfr": data["intfr"] || null,
+        "intgrnl": data["intgrnl"] || null,
+        "intifa2": data["intifa2"] || null,
+        "intirl": data["intirl"] || null,
+        "intned": data["intned"] || null,
+        "intnem": data["intnem"] || null,
+        "intnsl": data["intnsl"] || null,
+        "intvkl": data["intvkl"] || null,
+        "npshyd": data["npshyd"] || null,
+        "nuclear": data["nuclear"] || null,
+        "ocgt": data["ocgt"] || null,
+        "oil": data["oil"] || null,
+        "other": data["other"] || null,
+        "ps": data["ps"] || null,
+        "wind": data["wind"] || null,
+        "solar": data["solar"] || null,
+        "co2": data["co2"] || null,
+        "co2_index": data["co2_index"] || null,
+        "co2_forecast": data["co2_forecast"] || null,
+        "wind_embedded": data["wind_embedded"] || null
     }
 
 }
@@ -155,15 +154,15 @@ function separateNegativeValues(data) {
     var positives = {};
 
     // yeah this seems really inaccurate, i mean im keeping it in the api anyway but still
-    delete data.SOLAR_EMBEDDED;
+    delete data.solar_embedded;
 
     /* idk whether wind embedded should be combined with the main wind or not, 
     i'll do it here but i'll leave the maps in the JS just in case */
-    data.WIND = data.WIND + data.WIND_EMBEDDED;
-    delete data.WIND_EMBEDDED;
+    data.wind = data.wind + data.wind_embedded;
+    delete data.wind_embedded;
 
     for (const key in data) {
-        if (!["CO2", "CO2_INDEX", "CO2_FORECAST"].includes(key)) {
+        if (!["co2", "co2_index", "co2_forecast"].includes(key)) {
             if (data[key] < 0) {
                 negatives[key] = data[key];
             } else {
@@ -190,21 +189,21 @@ function getContrastColor(hexColor) {
 }
 
 /**
- *  Remove all the INT* keys and add IMPORTS (an aggregate of them all)
+ *  Remove all the int* keys and add imports (an aggregate of them all)
  *  @param {object} positives 
  *  @param {object} categories 
  *  @returns {object} data for the doughnut chart
  */
 function calcDoughnutData(positives, categories) {
-    delete positives.INTFR;
-    delete positives.INTGRNL;
-    delete positives.INTIFA2;
-    delete positives.INTIRL;
-    delete positives.INTNED;
-    delete positives.INTNEM;
-    delete positives.INTNSL;
-    delete positives.INTVKL;
-    positives.IMPORTS = categories.imports;
+    delete positives.intfr;
+    delete positives.intgrnl;
+    delete positives.intifa2;
+    delete positives.intirl;
+    delete positives.intned;
+    delete positives.intnem;
+    delete positives.intnsl;
+    delete positives.intvkl;
+    positives.imports = categories.imports;
 
     return positives;
 }
@@ -215,20 +214,20 @@ function calcDoughnutData(positives, categories) {
  *  @returns {object} {renewables, lowCarbon, fossilFuels, imports}
  */
 function calculateCategories(data) {
-    const renewables = data.WIND + data.SOLAR + data.WIND_EMBEDDED || data.WIND + data.SOLAR;
-    const lowCarbon = data.BIOMASS + data.NUCLEAR;
-    const fossilFuels = data.CCGT + data.COAL + data.OIL + data.OCGT;
+    const renewables = data.wind + data.solar + data.wind_embedded || data.wind + data.solar;
+    const lowCarbon = data.biomass + data.nuclear;
+    const fossilFuels = data.ccgt + data.coal + data.oil + data.ocgt;
     const imports =
-        (data.INTELEC ?? 0) +
-        (data.INTEW ?? 0) +
-        (data.INTFR ?? 0) +
-        (data.INTGRNL ?? 0) +
-        (data.INTIFA2 ?? 0) +
-        (data.INTIRL ?? 0) +
-        (data.INTNED ?? 0) +
-        (data.INTNEM ?? 0) +
-        (data.INTNSL ?? 0) +
-        (data.INTVKL ?? 0);
+        (data.intelec ?? 0) +
+        (data.intew ?? 0) +
+        (data.intfr ?? 0) +
+        (data.intgrnl ?? 0) +
+        (data.intifa2 ?? 0) +
+        (data.intirl ?? 0) +
+        (data.intned ?? 0) +
+        (data.intnem ?? 0) +
+        (data.intnsl ?? 0) +
+        (data.intvkl ?? 0);
 
     return { renewables, lowCarbon, fossilFuels, imports };
 }
@@ -242,7 +241,7 @@ function separateImports(data) {
     const imports = {};
 
     for (const key in data) {
-        if (key.includes("INT")) {
+        if (key.includes("int")) {
             imports[key] = data[key];
         }
     }
@@ -266,34 +265,34 @@ function processHistoricalData(rawData, averagedDays = false, includeEmbedded = 
     }
 
     var energySources = Object.keys(rawData[0].data).filter(source =>
-        source !== 'SOLAR_EMBEDDED' && source !== 'CO2' && source !== 'CO2_INDEX' && source !== 'CO2_FORECAST'
+        source !== 'solar_embedded' && source !== 'co2' && source !== 'co2_index' && source !== 'co2_forecast'
     );
 
-        if (energySources.includes('WIND') && energySources.includes('WIND_EMBEDDED')) {
-            // Remove WIND_EMBEDDED from the sources array, as it will be combined with WIND
-            energySources = energySources.filter(source => source !== 'WIND_EMBEDDED');
-        }
+    if (energySources.includes('wind') && energySources.includes('wind_embedded')) {
+        // Remove wind_embedded from the sources array, as it will be combined with wind
+        energySources = energySources.filter(source => source !== 'wind_embedded');
+    }
 
     const desiredOrder = [
-        'NUCLEAR',
-        'BIOMASS',
-        'NPSHYD',
-        'WIND',
-        'SOLAR',
-        'CCGT',
-        'OCGT',
-	'COAL',
-        'INTFR',
-        'INTIFA2',
-        'INTELEC',
-        'INTGRNL',
-        'INTIRL',
-        'INTEW',
-        'INTNED',
-        'INTNEM',
-        'INTNSL',
-        'INTVKL',
-        'PS',
+        'nuclear',
+        'biomass',
+        'npshyd',
+        'wind',
+        'solar',
+        'ccgt',
+        'ocgt',
+        'coal',
+        'intfr',
+        'intifa2',
+        'intelec',
+        'intgrnl',
+        'intirl',
+        'intew',
+        'intned',
+        'intnem',
+        'intnsl',
+        'intvkl',
+        'ps',
     ];
 
     // Sort energy sources based on the predefined order
@@ -302,12 +301,12 @@ function processHistoricalData(rawData, averagedDays = false, includeEmbedded = 
     });
 
     const datasets = energySources.map(source => {
-        // Combine WIND and WIND_EMBEDDED if both are present
+        // Combine wind and wind_embedded if both are present
         if (includeEmbedded) {
             var data = rawData.map(entry => {
-                if (source === 'WIND') {
-                    // Combine WIND and WIND_EMBEDDED data
-                    return (entry.data['WIND'] || 0) + (entry.data['WIND_EMBEDDED'] || 0);
+                if (source === 'wind') {
+                    // Combine wind and wind_embedded data
+                    return (entry.data['wind'] || 0) + (entry.data['wind_embedded'] || 0);
                 }
                 return entry.data[source] || 0;
             });
@@ -331,7 +330,7 @@ function processHistoricalData(rawData, averagedDays = false, includeEmbedded = 
 }
 
 /**
- *  Process the historical CO2 data and return the timestamps and datasets ready for use in chart.js
+ *  Process the historical co2 data and return the timestamps and datasets ready for use in chart.js
  *  @param {object} rawData 
  *  @param {boolean} averagedDays 
  *  @returns {object} {co2Timestamps, co2Datasets}
@@ -346,7 +345,7 @@ function processHistoricalCO2(rawData, averagedDays = false) {
     }
 
     var energySources = Object.keys(rawData[0].data).filter(source =>
-        source == 'CO2' || source == 'CO2_FORECAST'
+        source == 'co2' || source == 'co2_forecast'
     );
 
     const co2Datasets = energySources.map(source => {
@@ -598,16 +597,16 @@ function renderLineChart(timestamps, datasets, chartId) {
 }
 
 /**
- *  Update the CO2 intensity information in the dashboard
+ *  Update the co2 intensity information in the dashboard
  *  @param {object} data 
  */
 function updateCO2Info(data) {
     const co2Index = document.getElementById('co2-index');
     co2Index.classList.add('aqua-text'); // Apply aqua text style
-    if (data.CO2 == null || data.CO2 == "null" || data.CO2 == "" || data.CO2 == undefined) {
-        co2Index.textContent = `CO2 Intensity: ${data.CO2_FORECAST} gCO2/kWh (forecasted)`;
+    if (data.co2 == null || data.co2 == "null" || data.co2 == "" || data.co2 == undefined) {
+        co2Index.textContent = `co2 Intensity: ${data.co2_forecast} gCO2/kWh (forecasted)`;
     } else {
-        co2Index.textContent = `CO2 Intensity: ${data.CO2} gCO2/kWh (${data.CO2_INDEX.toUpperCase()})`;
+        co2Index.textContent = `co2 Intensity: ${data.co2} gCO2/kWh (${data.co2_index.toUpperCase()})`;
     }
 }
 
@@ -623,7 +622,7 @@ function displayDemand(data, positives, negatives) {
     let negativeTotal = 0;
 
     for (const key in data) {
-        if (colours[key] && !["CO2", "CO2_INDEX", "CO2_FORECAST"].includes(key)) {
+        if (colours[key] && !["co2", "co2_index", "co2_forecast"].includes(key)) {
             demand += data[key];
         }
     }
