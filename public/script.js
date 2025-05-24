@@ -53,13 +53,13 @@ const friendlyNames = {
 };
 
 const co2Names = {
-    CO2: 'CO₂ (actual)',
-    CO2_FORECAST: 'CO₂ (forecast)'
+    co2: 'CO₂ (actual)',
+    co2_forecast: 'CO₂ (forecast)'
 };
 
 const co2Colours = {
-    CO2: '#008043',
-    CO2_FORECAST: '#69D6F8'
+    co2: '#008043',
+    co2_forecast: '#69D6F8'
 };
 
 /**
@@ -164,7 +164,7 @@ function getContrastColor(hexColor) {
 }
 
 /**
- *  Remove all the INT* keys and add IMPORTS (an aggregate of them all)
+ *  Remove all the int* keys and add imports (an aggregate of them all)
  *  @param {object} positives 
  *  @param {object} categories 
  *  @returns {object} data for the doughnut chart
@@ -255,7 +255,6 @@ function processHistoricalData(rawData, averagedDays = false) {
         energySources = energySources.filter(source => source !== 'wind_embedded');
     }
 
-
     const desiredOrder = [
         'nuclear',
         'biomass',
@@ -308,7 +307,7 @@ function processHistoricalData(rawData, averagedDays = false) {
 }
 
 /**
- *  Process the historical CO2 data and return the timestamps and datasets ready for use in chart.js
+ *  Process the historical co2 data and return the timestamps and datasets ready for use in chart.js
  *  @param {object} rawData 
  *  @param {boolean} averagedDays 
  *  @returns {object} {co2Timestamps, co2Datasets}
@@ -575,7 +574,7 @@ function renderLineChart(timestamps, datasets, chartId) {
 }
 
 /**
- *  Update the CO2 intensity information in the dashboard
+ *  Update the co2 intensity information in the dashboard
  *  @param {object} data 
  */
 function updateCO2Info(data) {
