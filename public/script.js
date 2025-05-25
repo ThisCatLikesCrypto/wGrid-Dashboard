@@ -350,8 +350,22 @@ function processHistoricalCO2(rawData, averagedDays = false) {
  *  @param {string} label 
  */
 function renderDoughnutChart(data, elementId, label) {
-    const labels = Object.keys(data).map(key => friendlyNames[key] || key);
     const values = Object.values(data);
+    const allZeroOrEmpty = values.length === 0 || values.every(v => v === 0);
+
+    if (allZeroOrEmpty) {
+        const ctx = document.getElementById(elementId).getContext('2d');
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+        // Optional: draw "none :D" manually on the canvas
+        ctx.font = '30px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#666';
+        ctx.fillText('(none) :D', ctx.canvas.width / 2, ctx.canvas.height / 2);
+        return;
+    }
+
+    const labels = Object.keys(data).map(key => friendlyNames[key] || key);
     const backgroundColors = Object.keys(data).map(key => colours[key]);
 
     const ctx = document.getElementById(elementId).getContext('2d');
@@ -383,16 +397,11 @@ function renderDoughnutChart(data, elementId, label) {
                         const dataArr = context.chart.data.datasets[0].data;
                         const sum = dataArr.reduce((acc, curr) => acc + curr, 0);
                         const percentage = (value / sum) * 100;
-
-                        // Only display percentages >= 5%
-                        if (percentage >= 5) {
-                            return `${percentage.toFixed(2)}%`;
-                        }
-                        return '';
+                        return percentage >= 5 ? `${percentage.toFixed(2)}%` : '';
                     },
                     color: (context) => {
                         const bgColor = context.dataset.backgroundColor[context.dataIndex];
-                        return getContrastColor(bgColor); // Determine text color
+                        return getContrastColor(bgColor);
                     },
                     font: {
                         weight: 'bold',
