@@ -275,6 +275,7 @@ function processHistoricalData(rawData, averagedDays = false) {
         'intnsl',
         'intvkl',
         'ps',
+        'other'
     ];
 
 
