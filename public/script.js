@@ -97,7 +97,7 @@ async function fetchData(endpoint) {
         return await response.json();
     } catch (error) {
         console.error(error);
-        document.getElementById('loadingIndicator').innerHTML = `Failed to load /${url}`;
+        document.getElementById('loadingIndicator').innerHTML = `Failed to load /api/${endpoint}`;
         return null;
     }
 }
@@ -142,6 +142,21 @@ function cleanData(data) {
         "wind_embedded": data["wind_embedded"] || null
     }
 
+}
+
+/**
+ * cleans the historical data object by running each timestamp through `cleanData()`
+ * @param {object} data
+ * @returns {object} cleaned data
+ */
+function cleanHistorical(data) {
+    for (const timestamp in data) {
+        console.log(data[timestamp]["data"]);
+        let ts = data[timestamp];
+        ts["data"] = cleanData(data[timestamp]["data"]);
+        data[timestamp] = ts;
+    }
+    return data;
 }
 
 /**
@@ -694,7 +709,7 @@ async function initialiseDashboard() {
  */
 async function initialiseHistorical() {
     const startTimestamp = new Date();
-    const data = await fetchData('all/month-avg');
+    const data = cleanHistorical(await fetchData('all/month-avg'));
     if (data) {
         const { timestamps, datasets } = processHistoricalData(data, true, false);
         renderStackedAreaChart(timestamps, datasets, 'pastForever');
