@@ -1,0 +1,41 @@
+---
+import Layout from "../../layouts/API.astro"
+---
+
+<Layout title="API Documentation">
+    <div class="card walloftextbig">
+        <h1>API Documentation</h1>
+        <p>This is the API documentation for wGrid's API.</p>
+        <br>
+        <h2>API Endpoints</h2>
+        <p>The API is currently in development, and will be documented more at some point. Endpoints should no longer change, and if they do a /v2/ or such will be used for
+            the new ones, leaving the old ones online, even if deprecated.</p>
+        <ul>
+            <li><a href="./current">/api/current</a> - the current electricity mix</li>
+            <li><a href="./today">/api/today</a> - the current electricity mix, for today</li>
+            <li><a href="./today/avg">/api/today/avg</a> - the current electricity mix, for today, averaged</li>
+            <li><a href="./past-x-hrs">/api/past-x-hrs</a> - historical data for a given time period</li>
+            <li><a href="./past-x-hrs/avg">/api/past-x-hrs/avg</a> - averaged historical data for a given time period</li>
+            <li><a href="./past-week">/api/past-week</a> - historical data for the past week</li>
+            <li><a href="./past-week/avg">/api/past-week/avg</a> - averaged historical data for the past week</li>
+            <li><a href="./past-month">/api/past-month</a> - historical data for the past month</li>
+            <li><a href="./past-month/avg">/api/past-month/avg</a> - averaged historical data for the past month</li>
+            <li><a href="./past-year">/api/past-year</a> - historical data for the past year</li>
+            <li><a href="./past-year/avg">/api/past-year/avg</a> - averaged historical data for the past year</li>
+            <li><a href="./past-year/day-avg">/api/past-year/day-avg</a> - averaged historical data for the past year, by day</li>
+            <li><a href="./past-year/week-avg">/api/past-year/week-avg</a> - averaged historical data for the past year, by week</li>
+            <li><a href="./all">/api/all</a> - historical data for all time</li>
+            <li><a href="./all/avg">/api/all/avg</a> - averaged historical data for all time</li>
+            <li><a href="./all/week-avg">/api/all/week-avg</a> - averaged historical data for all time, by week</li>
+            <li><a href="./all/month-avg">/api/all/month-avg</a> - averaged historical data for all time, by month</li>
+            <li><a href="./all/year-avg">/api/all/year-avg</a> - averaged historical data for all time, by year</li>
+            <li><a href="./date">/api/date</a> - data for a given date</li>
+            <li><a href="./date-range">/api/date-range</a> - data for a given date range</li>
+            <li><a href="./date-range/avg">/api/date-range/avg</a> - averaged data for a given date range</li>
+            <li><a href="./average">/api/average</a> - universal averages endpoint</li>
+            <li><a href="./co2/date-range">/api/co2/date-range</a> - CO<sub>2</sub> data for a given date range</li>
+            <li><a href="./co2/date-range/avg">/api/co2/date-range/avg</a> - averaged CO<sub>2</sub> data for a given date range</li>
+            <li><a href="./db">/api/db</a> - the database</li>
+        </ul>
+    </div>
+</Layout>
