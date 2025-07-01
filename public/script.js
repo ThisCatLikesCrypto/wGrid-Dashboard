@@ -27,9 +27,9 @@ const colours = {
 };
 
 const friendlyNames = {
-    biomass: 'biomass',
+    biomass: 'Biomass',
     ccgt: 'Gas',
-    coal: 'coal',
+    coal: 'Coal',
     intelec: 'France (Eleclink)',
     intew: 'Ireland (East-West)',
     intfr: 'France (IFA)',
@@ -42,14 +42,14 @@ const friendlyNames = {
     intvkl: 'Denmark (Viking Link)',
     imports: 'Imports',
     npshyd: 'Hydro',
-    nuclear: 'nuclear',
+    nuclear: 'Nuclear',
     ocgt: 'Open Cycle Gas',
-    oil: 'oil',
-    other: 'other',
+    oil: 'Oil',
+    other: 'Other',
     ps: 'Pumped Storage',
-    wind: 'wind',
-    wind_embedded: 'wind (Embedded, estimated)',
-    solar: 'solar'
+    wind: 'Wind',
+    wind_embedded: 'Wind (Embedded; estimated)',
+    solar: 'Solar'
 };
 
 const co2Names = {
@@ -618,9 +618,9 @@ function updateCO2Info(data) {
     const co2Index = document.getElementById('co2-index');
     co2Index.classList.add('aqua-text'); // Apply aqua text style
     if (data.co2 == null || data.co2 == "null" || data.co2 == "" || data.co2 == undefined) {
-        co2Index.textContent = `co2 Intensity: ${data.co2_forecast} gCO2/kWh (forecasted)`;
+        co2Index.textContent = `CO₂ Intensity: ${data.co2_forecast} gCO2/kWh (forecasted)`;
     } else {
-        co2Index.textContent = `co2 Intensity: ${data.co2} gCO2/kWh (${data.co2_index.toUpperCase()})`;
+        co2Index.textContent = `CO₂ Intensity: ${data.co2} gCO2/kWh (${data.co2_index.toUpperCase()})`;
     }
 }
 
