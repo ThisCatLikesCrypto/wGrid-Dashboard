@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro"
+import InfoHover from "../components/InfoHover.astro"
 ---
 
 <Layout title="Dashboard" description="A UK grid dashboard; shows the status of the UK's electricity grid">
@@ -21,6 +22,10 @@ import Layout from "../layouts/Layout.astro"
         <div class="card centretext">
             <h2>Power</h2>
             <p class="important-values" id="power-equation"></p>
+        </div>
+        <div class="card centretext">
+            <h2>Progress to 2030 target <InfoHover text="The 2030 Target, as set by the government, is 50gCO₂/kWh. This is the multiplier of this amount over the past year. 1x means the target is met."/></h2>
+            <p class="important-values" id="progress"></p>
         </div>
     </div>
     <div class="chart-container">

@@ -1,0 +1,74 @@
+---
+export interface Props {
+  text: string;
+}
+const { text } = Astro.props;
+---
+
+<style>
+  .info-container {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+  }
+
+  .info-button {
+    width: 1.2rem;
+    height: 1.2rem;
+    border-radius: 50%;
+    background-color: #313244; /* Catppuccin overlay */
+    color: #89dceb;            /* Catppuccin teal accent */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: bold;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .info-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 8px #89dceb77;
+  }
+
+  .info-popup {
+    visibility: hidden;
+    opacity: 0;
+    width: max-content;
+    max-width: 220px;
+    background-color: #1e1e2e;
+    color: #cdd6f4;           
+    text-align: left;
+    border-radius: 8px;
+    padding: 0.6rem;
+    position: absolute;
+    z-index: 1;
+    bottom: 140%; /* appear above the button */
+    left: 50%;
+    transform: translateX(-50%);
+    transition: opacity 0.3s;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    font-size: 0.8rem;
+  }
+
+  .info-popup::after {
+    content: "";
+    position: absolute;
+    top: 100%; /* arrow at bottom of popup */
+    left: 50%;
+    margin-left: -6px;
+    border-width: 6px;
+    border-style: solid;
+    border-color: #1e1e2e transparent transparent transparent;
+  }
+
+  .info-container:hover .info-popup {
+    visibility: visible;
+    opacity: 1;
+  }
+</style>
+
+<span class="info-container">
+  <span class="info-button">i</span>
+  <span class="info-popup">{text}</span>
+</span>

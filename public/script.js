@@ -381,6 +381,20 @@ function processHistoricalCO2(rawData, averagedDays = false) {
 }
 
 /**
+ *  Takes the CO2 data and averages it out for the whole year
+ *  @param {object} {co2Timestamps, co2Datasets}
+ *  @returns {number} averagedCO2
+ */
+function averageCO2(co2Timestamps, co2Datasets) {
+    let averagedCO2 = 0;
+    for (let i = 0; i < co2Timestamps.length; i++) {
+        averagedCO2 += co2Datasets[0].data[i];
+    }
+    averagedCO2 /= co2Timestamps.length;
+    return averagedCO2;
+}
+
+/**
  *  Render a doughnut chart using chart.js
  *  @param {object} data 
  *  @param {string} elementId 
@@ -616,12 +630,21 @@ function renderLineChart(timestamps, datasets, chartId) {
  */
 function updateCO2Info(data) {
     const co2Index = document.getElementById('co2-index');
-    co2Index.classList.add('aqua-text'); // Apply aqua text style
     if (data.co2 == null || data.co2 == "null" || data.co2 == "" || data.co2 == undefined) {
         co2Index.textContent = `CO₂ Intensity: ${data.co2_forecast} gCO2/kWh (forecasted)`;
     } else {
         co2Index.textContent = `CO₂ Intensity: ${data.co2} gCO2/kWh (${data.co2_index.toUpperCase()})`;
     }
+}
+
+/**
+ *  Display the progress information (towards the 2030 target 
+ *  of 50gCO2/kWh in the dashboard
+ *  @param {number} averagedCO2
+ */
+function displayProgress(averagedCO2) {
+    const progress = document.getElementById('progress');
+    progress.textContent = `CO₂ is ${Math.round(averagedCO2)/50}x of 2030 goal`; 
 }
 
 /**
@@ -703,6 +726,8 @@ async function initialiseDashboard() {
             processHistoricalCO2(pastYearData, true)
         ]);
 
+        const averagedCO2 = averageCO2(yearCO2Timestamps, yearCO2Datasets);
+
         console.warn("I'm an idiot");
 
         // Render current data charts
@@ -711,6 +736,7 @@ async function initialiseDashboard() {
         renderBarChart(categories);
         updateCO2Info(data);
         displayDemand(data, positives, negatives);
+        displayProgress(averagedCO2);
 
         renderStackedAreaChart(timestamps, datasets, 'past48Hours');
         renderLineChart(co2Timestamps, co2Datasets, 'past48HoursCO2');
