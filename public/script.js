@@ -659,22 +659,49 @@ function displayDemand(data, positives, negatives) {
  */
 async function initialiseDashboard() {
     const startTimestamp = new Date();
-    const data = cleanData(await fetchData('current')); // only current data needs to be cleaned as this only exists to account for when upstream APIs are behind
-    const past48HrsData = await fetchData('past-48-hrs');
-    const pastWeekData = await fetchData('past-week');
-    const pastYearData = await fetchData('past-year/week-avg');
-    if (data) {
+
+    try {
+        // Fetch all data in parallel
+        const [
+            currentDataRaw,
+            past48HrsData,
+            pastWeekData,
+            pastYearData
+        ] = await Promise.all([
+            fetchData('current'),
+            fetchData('past-48-hrs'),
+            fetchData('past-week'),
+            fetchData('past-year/week-avg')
+        ]);
+
+        const data = cleanData(currentDataRaw);
+
+        if (!data) {
+            document.getElementById('dashboard').innerHTML = '<h1>Failed to load data.</h1>';
+            return;
+        }
+
         // Process all the data
         const { positives, negatives } = separateNegativeValues(data);
         const categories = calculateCategories(positives);
         const doughnutData = calcDoughnutData(positives, categories);
         const imports = separateImports(positives);
-        const { timestamps: timestamps, datasets: datasets } = processHistoricalData(past48HrsData);
-        const { co2Timestamps: co2Timestamps, co2Datasets: co2Datasets } = processHistoricalCO2(past48HrsData);
-        const { timestamps: weekTimestamps, datasets: weekDatasets } = processHistoricalData(pastWeekData);
-        const { co2Timestamps: weekCO2Timestamps, co2Datasets: weekCO2Datasets } = processHistoricalCO2(pastWeekData);
-        const { timestamps: yearTimestamps, datasets: yearDatasets } = processHistoricalData(pastYearData, true);
-        const { co2Timestamps: yearCO2Timestamps, co2Datasets: yearCO2Datasets } = processHistoricalCO2(pastYearData, true);
+
+        const [
+            { timestamps, datasets },
+            { co2Timestamps, co2Datasets },
+            { timestamps: weekTimestamps, datasets: weekDatasets },
+            { co2Timestamps: weekCO2Timestamps, co2Datasets: weekCO2Datasets },
+            { timestamps: yearTimestamps, datasets: yearDatasets },
+            { co2Timestamps: yearCO2Timestamps, co2Datasets: yearCO2Datasets }
+        ] = await Promise.all([
+            processHistoricalData(past48HrsData),
+            processHistoricalCO2(past48HrsData),
+            processHistoricalData(pastWeekData),
+            processHistoricalCO2(pastWeekData),
+            processHistoricalData(pastYearData, true),
+            processHistoricalCO2(pastYearData, true)
+        ]);
 
         console.warn("I'm an idiot");
 
@@ -698,10 +725,13 @@ async function initialiseDashboard() {
 
         document.getElementById('loadingIndicator').style.display = 'none';
         document.getElementById('defaultButton').click();
-    } else {
+
+    } catch (error) {
+        console.error('Error initialising dashboard:', error);
         document.getElementById('dashboard').innerHTML = '<h1>Failed to load data.</h1>';
     }
 }
+
 
 /**
  * Initialise historical data (/historical/)
