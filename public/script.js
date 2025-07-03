@@ -307,6 +307,7 @@ function processHistoricalData(rawData, averagedDays = false, includeEmbedded = 
         'intnsl',
         'intvkl',
         'ps',
+        'other'
     ];
 
     // Sort energy sources based on the predefined order

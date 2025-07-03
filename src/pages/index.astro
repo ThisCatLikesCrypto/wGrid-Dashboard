@@ -5,8 +5,8 @@ import InfoHover from "../components/InfoHover.astro"
 
 <Layout title="Dashboard" description="A UK grid dashboard; shows the status of the UK's electricity grid">
     <div class="card centretext">
-        <h1>wGrid Dashboard</h1>
-        <h2>The UK's current electricity mix</h2>
+        <h2>wGrid Dashboard</h1>
+        <h3>The UK's current electricity mix</h2>
         <p>Data is updated every 30 minutes.</p>
         <p style="color: orange">WIP! email <a style="color: orange" href="mailto:contact@wilburwilliams.uk">contact@wilburwilliams.uk</a> if anything is broken</p>
     </div>
@@ -16,11 +16,11 @@ import InfoHover from "../components/InfoHover.astro"
     </noscript>
     <div class="upwidgets">
         <div class="card centretext">
-            <h2>CO<sub>2</sub> Index</h2>
+            <h2>CO<sub>2</sub> Index <InfoHover text="This is the current amount of carbon dioxide emitted every time one kWh is consumed. It is calculated by NESO at carbonintensity.org.uk" /></h2>
             <p class="important-values" id="co2-index"></p>
         </div>
         <div class="card centretext">
-            <h2>Power</h2>
+            <h2>Power <InfoHover text="Total is total consumption, generation is generation plus imports, and demands is exports and pumped hydro (when it is storing)" /></h2>
             <p class="important-values" id="power-equation"></p>
         </div>
         <div class="card centretext">
@@ -30,15 +30,15 @@ import InfoHover from "../components/InfoHover.astro"
     </div>
     <div class="chart-container">
         <div class="chart-box card">
-            <h3 class="centretext">Generation Sources</h3>
+            <h3 class="centretext">Generation Sources <InfoHover text="This shows the percentage of total generation coming from each source at any given time." /></h3>
             <canvas id="generationDoughnutChart"></canvas>
         </div>
         <div class="chart-box card">
-            <h3 class="centretext">Imports</h3>
+            <h3 class="centretext">Imports <InfoHover text="The UK has many interconnectors to other countries. This shows the percentage of total imports coming from each source at any given time. Very occasionally, there will be zero, so this chart doesn't show up." /> </h3>
             <canvas id="importsDoughnutChart"></canvas>
         </div>
         <div class="chart-box card">
-            <h3 class="centretext">Generation Categories</h3>
+            <h3 class="centretext">Generation Categories <InfoHover text="This shows the proportion of generation coming from each source. Biomass is in low-carbon, not renewables, as sometimes biomass is imported from non-renewable sources." /></h3>
             <canvas id="categoryBarChart"></canvas>
         </div>
     </div>
@@ -51,13 +51,13 @@ import InfoHover from "../components/InfoHover.astro"
     <div class="tabcontent" id="past48HoursContainer">
         <div class="chart-container">
             <div class="chart-box card takeupfullwidth">
-                <h3 class="centretext">Past 48 hours (in MW)</h3>
+                <h3 class="centretext">Past 48 hours (in MW) <InfoHover text="This shows the total power generated for the past 48 hours. This includes generation, imports and exports. Click on each of the generation sources at the side to toggle them from the chart." /></h3>
                 <canvas id="past48Hours"></canvas>
             </div>
         </div>
         <div class="chart-container">
             <div class="chart-box card takeupfullwidth">
-                <h3 class="centretext">CO<sub>2</sub> for the past 48 hours (in gCO<sub>2</sub>/kWh)</h3>
+                <h3 class="centretext">CO<sub>2</sub> for the past 48 hours (in gCO<sub>2</sub>/kWh) <InfoHover text="This shows the amount of carbon dioxide emitted for the past 48 hours per kWh. Oftentimes actual data is not available for the most recent half an hour, so will show zero and forecast should be used instead." /></h3>
                 <canvas id="past48HoursCO2"></canvas>
             </div>
         </div>

@@ -16,8 +16,8 @@ const { text } = Astro.props;
     width: 1.2rem;
     height: 1.2rem;
     border-radius: 50%;
-    background-color: #313244; /* Catppuccin overlay */
-    color: #89dceb;            /* Catppuccin teal accent */
+    background-color: #313244;
+    color: #89dceb;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -37,24 +37,27 @@ const { text } = Astro.props;
     width: max-content;
     max-width: 220px;
     background-color: #1e1e2e;
-    color: #cdd6f4;           
+    color: #cdd6f4;
     text-align: left;
     border-radius: 8px;
     padding: 0.6rem;
     position: absolute;
     z-index: 1;
-    bottom: 140%; /* appear above the button */
-    left: 50%;
-    transform: translateX(-50%);
+    bottom: 140%;
     transition: opacity 0.3s;
     box-shadow: 0 0 10px rgba(0,0,0,0.5);
     font-size: 0.8rem;
+    left: 50%;
+    transform: translateX(-50%);
+    inset-inline: auto; /* reset logical horizontal insets */
+    /* Use logical clamp on horizontal overflow with max-width */
+    max-width: min(220px, calc(100vw - 20px));
   }
 
   .info-popup::after {
     content: "";
     position: absolute;
-    top: 100%; /* arrow at bottom of popup */
+    top: 100%;
     left: 50%;
     margin-left: -6px;
     border-width: 6px;
@@ -66,7 +69,55 @@ const { text } = Astro.props;
     visibility: visible;
     opacity: 1;
   }
+
 </style>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const containers = document.querySelectorAll<HTMLElement>('.info-container');
+
+    containers.forEach((container) => {
+      const button = container.querySelector<HTMLElement>('.info-button');
+      const popup = container.querySelector<HTMLElement>('.info-popup');
+
+      if (!button || !popup) return; // skip if elements missing
+
+      container.addEventListener('mouseenter', () => {
+        popup.style.left = '50%';
+        popup.style.transform = 'translateX(-50%)';
+
+        popup.style.visibility = 'visible';
+        popup.style.opacity = '0';
+
+        requestAnimationFrame(() => {
+          const popupRect = popup.getBoundingClientRect();
+          const viewportWidth = window.innerWidth;
+
+          let offsetX = -0.5 * popupRect.width; // default centre
+
+          const leftEdge = popupRect.left;
+          const rightEdge = popupRect.right;
+
+          if (leftEdge < 10) {
+            offsetX += (10 - leftEdge); // push right so left edge is 10px from screen
+          } else if (rightEdge > viewportWidth - 10) {
+            offsetX -= (rightEdge - (viewportWidth - 10)); // push left so right edge is 10px from screen
+          }
+
+          popup.style.transform = `translateX(${offsetX}px)`;
+          popup.style.opacity = '1'; // fade in after positioning
+        });
+      });
+
+      container.addEventListener('mouseleave', () => {
+        // Reset popup to hidden state
+        popup.style.visibility = '';
+        popup.style.opacity = '';
+        popup.style.left = '';
+        popup.style.transform = '';
+      });
+    });
+  });
+</script>
 
 <span class="info-container">
   <span class="info-button">i</span>

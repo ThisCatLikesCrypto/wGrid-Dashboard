@@ -33,9 +33,10 @@
 
 body {
     font-family: 'Lexend', Calibri, Carlito, sans-serif;
-    margin: 20px;
+    margin: 12px;
     background-color: var(--base);
     color: var(--text);
+    overflow-x: hidden;
 }
 
 a {
@@ -54,7 +55,7 @@ li {
 .card {
     background-color: var(--surface0);
     border-radius: 5px;
-    padding: 10px;
+    padding: 5px;
     margin: 10px;
 }
 
