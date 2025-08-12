@@ -62,6 +62,29 @@ const co2Colours = {
     co2_forecast: '#69D6F8'
 };
 
+const desiredOrder = [
+    'nuclear',
+    'biomass',
+    'npshyd',
+    'wind',
+    'solar',
+    'ccgt',
+    'ocgt',
+    'coal',
+    'intfr',
+    'intifa2',
+    'intelec',
+    'intgrnl',
+    'intirl',
+    'intew',
+    'intned',
+    'intnem',
+    'intnsl',
+    'intvkl',
+    'ps',
+    'other'
+];
+
 /**
  *  Open the tab with the given name and add an "active" class 
  *  to the button that opened the tab, and hide all other tabs (elements with class `tabcontent`).
@@ -287,29 +310,6 @@ function processHistoricalData(rawData, averagedDays = false, includeEmbedded = 
         energySources = energySources.filter(source => source !== 'wind_embedded');
     }
 
-    const desiredOrder = [
-        'nuclear',
-        'biomass',
-        'npshyd',
-        'wind',
-        'solar',
-        'ccgt',
-        'ocgt',
-        'coal',
-        'intfr',
-        'intifa2',
-        'intelec',
-        'intgrnl',
-        'intirl',
-        'intew',
-        'intned',
-        'intnem',
-        'intnsl',
-        'intvkl',
-        'ps',
-        'other'
-    ];
-
     // Sort energy sources based on the predefined order
     energySources = energySources.sort((a, b) => {
         return desiredOrder.indexOf(a) - desiredOrder.indexOf(b);
@@ -334,7 +334,7 @@ function processHistoricalData(rawData, averagedDays = false, includeEmbedded = 
         return {
             label: friendlyNames[source] || source,
             data: data,
-            backgroundColor: colours[source] || 'rgba(128, 128, 128, 0.5)', // Default colour if not defined
+            backgroundColor: colours[source] || 'rgba(128, 128, 128, 0.5)',
             borderColor: colours[source] || 'rgba(128, 128, 128, 1)',
             fill: true,
             pointRadius: 0,
@@ -371,7 +371,7 @@ function processHistoricalCO2(rawData, averagedDays = false) {
         return {
             label: co2Names[source] || source,
             data: data,
-            backgroundColor: co2Colours[source] || 'rgba(128, 128, 128, 0.5)', // Default color if not defined
+            backgroundColor: co2Colours[source] || 'rgba(128, 128, 128, 0.5)',
             borderColor: co2Colours[source] || 'rgba(128, 128, 128, 1)',
             fill: false,
             pointRadius: 0,
@@ -570,8 +570,6 @@ function renderStackedAreaChart(timestamps, datasets, chartId) {
             },
         },
     };
-
-    // Render the chart
     return new Chart(ctx, config);
 }
 
@@ -621,7 +619,6 @@ function renderLineChart(timestamps, datasets, chartId) {
             },
         },
     };
-    // Render the chart
     return new Chart(ctx, config);
 }
 
