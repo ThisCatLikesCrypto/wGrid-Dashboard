@@ -656,7 +656,6 @@ function displayDemand(data, positives, negatives) {
         .filter(key => colours[key] && !["co2", "co2_index", "co2_forecast"].includes(key))
         .reduce((sum, key) => sum + data[key], 0);
 
-    for (const key in data) {
     const positiveTotal = Object.values(positives).reduce((sum, val) => sum + val, 0);
     const negativeTotal = Math.abs(Object.values(negatives).reduce((sum, val) => sum + val, 0));
 
