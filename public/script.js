@@ -652,25 +652,13 @@ function displayProgress(averagedCO2) {
  *  @param {object} negatives 
  */
 function displayDemand(data, positives, negatives) {
-    let demand = 0;
-    let positiveTotal = 0;
-    let negativeTotal = 0;
+    const demand = Object.keys(data)
+        .filter(key => colours[key] && !["co2", "co2_index", "co2_forecast"].includes(key))
+        .reduce((sum, key) => sum + data[key], 0);
 
     for (const key in data) {
-        if (colours[key] && !["co2", "co2_index", "co2_forecast"].includes(key)) {
-            demand += data[key];
-        }
-    }
-
-    for (const key in positives) {
-        positiveTotal += positives[key];
-    }
-
-    for (const key in negatives) {
-        negativeTotal += negatives[key];
-    }
-
-    negativeTotal = negativeTotal.toString().replace("-", "")
+    const positiveTotal = Object.values(positives).reduce((sum, val) => sum + val, 0);
+    const negativeTotal = Math.abs(Object.values(negatives).reduce((sum, val) => sum + val, 0));
 
     document.getElementById('power-equation').innerHTML = `${demand}MW (total) = ${positiveTotal}MW (generation) - ${negativeTotal}MW (demands)`;
 }
