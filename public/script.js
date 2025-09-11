@@ -115,11 +115,18 @@ function openTab(element, tabName) {
 */
 async function fetchData(endpoint) {
     try {
-        const response = await fetch(`${API_URL}/${endpoint}`);
-        if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
-        return await response.json();
+        try {
+            const response = await fetch(`${API_URL}/${endpoint}`);
+            if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
+            return await response.json();
+        } catch { // fuck you, do it again
+            console.warn("retrying failed request")
+            const response = await fetch(`${API_URL}/${endpoint}`);
+            if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
+            return await response.json();
+        }
     } catch (error) {
-        console.error(error);
+        console.error('Unexpected error:', error);
         document.getElementById('loadingIndicator').innerHTML = `Failed to load /api/${endpoint}`;
         return null;
     }
