@@ -114,22 +114,41 @@ function openTab(element, tabName) {
  *  @returns {Promise<object>} - A promise that resolves to the JSON object.
 */
 async function fetchData(endpoint) {
-    try {
+    const maxAttempts = 4;
+    const baseDelay = 500; // base attempt timeout
+    const timeoutMs = 8000; // per-attempt timeout
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
         try {
-            const response = await fetch(`${API_URL}/${endpoint}`);
-            if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
-            return await response.json();
-        } catch { // fuck you, do it again
-            console.warn("retrying failed request")
-            const response = await fetch(`${API_URL}/${endpoint}`);
-            if (!response.ok) throw new Error(`Error fetching data: ${response.status}`);
-            return await response.json();
+            const response = await fetch(`${API_URL}/${endpoint}`, { signal: controller.signal });
+            clearTimeout(timeout);
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            clearTimeout(timeout);
+            const isAbort = error && error.name === 'AbortError';
+            console.warn(`fetch "${endpoint}" attempt ${attempt} failed${isAbort ? ' (timeout)' : ''}:`, error);
+
+            if (attempt === maxAttempts) {
+                console.error(`All fetch attempts for "${endpoint}" failed:`, error);
+                const el = document.getElementById('loadingIndicator');
+                if (el) el.innerHTML = `Failed to load /api/${endpoint}`;
+                return null;
+            }
+
+            const backoff = baseDelay * Math.pow(2, attempt - 1);
+            const jitter = Math.floor(Math.random() * 200);
+            await new Promise(res => setTimeout(res, backoff + jitter));
         }
-    } catch (error) {
-        console.error('Unexpected error:', error);
-        document.getElementById('loadingIndicator').innerHTML = `Failed to load /api/${endpoint}`;
-        return null;
     }
+
+    // Fallback (shouldn't reach here)
+    // (if it does, we're all fucked anyway)
+    return null;
 }
 
 /**
