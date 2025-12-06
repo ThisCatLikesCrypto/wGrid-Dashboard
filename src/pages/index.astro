@@ -5,10 +5,7 @@ import InfoHover from "../components/InfoHover.astro"
 
 <Layout title="Dashboard" description="A UK grid dashboard; shows the status of the UK's electricity grid">
     <div class="card centretext">
-        <h2>wGrid Dashboard</h1>
-        <h3>The UK's current electricity mix</h2>
-        <p>Data is updated every 30 minutes.</p>
-        <p style="color: orange">WIP! email <a style="color: orange" href="mailto:contact@wilburwilliams.uk">contact@wilburwilliams.uk</a> if anything is broken</p>
+        <h2>wGrid Dashboard: The UK's Current Electricity Mix</h2>
     </div>
     <h1 class="centretext" id="loadingIndicator">Loading...</h1>
     <noscript>
@@ -90,6 +87,10 @@ import InfoHover from "../components/InfoHover.astro"
             </div>
         </div>
     </div>
+    <p>
+        wGrid Dashboard: The UK's Current Electricity Mix | Data updated every 30 minutes | 
+        <a style="color: orange" href="mailto:contact@wilburwilliams.uk">contact@wilburwilliams.uk</a>
+    </p>
     <script is:inline src="/chart.js"></script>
     <script is:inline src="/script.js"></script>
     <script is:inline>

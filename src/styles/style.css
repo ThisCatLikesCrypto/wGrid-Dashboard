@@ -56,7 +56,7 @@ li {
     background-color: var(--surface0);
     border-radius: 5px;
     padding: 5px;
-    margin: 10px;
+    margin: 5px;
 }
 
 #dashboard {
@@ -97,7 +97,6 @@ canvas {
 .upwidgets {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
     justify-content: center;
 }
 
