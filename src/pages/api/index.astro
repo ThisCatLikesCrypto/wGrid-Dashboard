@@ -9,7 +9,10 @@ import Layout from "../../layouts/API.astro"
         <br>
         <h2>API Endpoints</h2>
         <p>The API is currently in development, and will be documented more at some point. Endpoints should no longer change, and if they do a /v2/ or such will be used for
-            the new ones, leaving the old ones online, even if deprecated.</p>
+            the new ones, leaving the old ones online, even if deprecated.<br>
+            There are no custom rate limits yet - please be kind to the API.<br>
+            Please note that /api/all endpoints return a lot of data (north of 100MB for /api/all) and currently have 
+            a huge 12-hour edge cache on them. If you need to download the whole database, please use /api/db and parse it your end.</p>
         <ul>
             <li><a href="./current">/api/current</a> - the current electricity mix</li>
             <li><a href="./today">/api/today</a> - the current electricity mix, for today</li>
